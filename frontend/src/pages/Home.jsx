@@ -198,48 +198,36 @@ const Home = () => {
   ];
 
   const categories = [
-    { 
-      id: 1, 
-      name: 'Veg Pickles', 
-      image: '/images/veg/veg1.jpg', 
-      link: '/products' 
+    {
+      id: 1,
+      name: 'Non Veg pickles',
+      image: '/images/Non-veg/Non-veg1.jpg',
+      link: '/products'
     },
-     { 
-      id: 2, 
-      name: 'Non-Veg Pickles', 
-     image: '/images/Non-veg/Non-veg1.jpg', 
-      link: '/products' 
-     },
-     { 
-       id: 3, 
-       name: 'Sweets', 
-      image: '/images/Sweets/swt1.jpg', 
-       link: '/products' 
+    {
+      id: 2,
+      name: 'Veg pickles',
+      image: '/images/veg/veg1.jpg',
+      link: '/products'
     },
-     { 
-      id: 4, 
-      name: 'Hots', 
-      image: '/images/Hots/hot1.jpg', 
-      link: '/products' 
-     },
-     { 
-       id: 5, 
-      name: 'Ingrediants', 
-      image: '/images/Ingredients/Ing1.webp', 
-      link: '/products' 
+    {
+      id: 3,
+      name: 'Snacks',
+      image: '/images/Hots/hot1.jpg',
+      link: '/products'
     },
-    { 
-      id: 6, 
-      name: 'All Types of Sweets&Hots', 
-      image: '/images/All/all.jpg', 
-      link: '/products' 
+    {
+      id: 4,
+      name: 'Sweets',
+      image: '/images/Sweets/swt1.jpg',
+      link: '/products'
     },
-    //  { 
-    //   id: 6, 
-    //   name: 'All Types of Pickles', 
-    //   image: '/images/All/all.jpg', 
-    //   link: '/products' 
-    // },
+    {
+      id: 5,
+      name: 'Masala podulu',
+      image: '/images/Ingredients/Ing1.webp',
+      link: '/products'
+    }
   ];
   const farmToHomeImages = [
     {
@@ -345,10 +333,10 @@ const Home = () => {
       {/* Explore Categories */}
       <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-5xl mx-auto flex flex-col items-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 text-center bg-yellow-400 py-2 px-4 rounded-lg inline-block">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 text-center py-2 px-4 rounded-lg inline-block" style={{backgroundColor: '#98A869'}}>
             Explore Categories
           </h2>
-          <div className="grid grid-cols-2 gap-4 sm:flex sm:overflow-x-auto sm:gap-8 px-4 py-2 sm:scrollbar-hide">
+          <div className="grid grid-cols-2 gap-4 sm:flex overflow-x-auto sm:overflow-x-auto sm:gap-8 px-4 py-2 sm:scrollbar-hide">
             {categories.map((category) => (
               <Link 
                 key={category.id} 
@@ -382,22 +370,22 @@ const Home = () => {
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-2">
               <div className="p-6 md:p-8">
-                <h2 className="text-2xl font-bold text-center mb-6 text-gray-800 bg-yellow-400 py-2 px-4 rounded-lg inline-block mx-auto block">Simple and Clear Options</h2>
+                <h2 className="text-2xl font-bold text-center mb-6 text-white py-2 px-4 rounded-lg inline-block mx-auto block" style={{backgroundColor: '#98A869'}}>Simple and Clear Options</h2>
                 <div className="space-y-3">
                   <div className="bg-gray-50 p-3 rounded-lg hover:shadow-md transition-shadow duration-300">
-                    <h3 className="text-base font-medium text-gray-800">"Ma Amma Ruchulu Pickles – A Taste of Tradition in Every Bite!"</h3>
+                    <h3 className="text-base font-medium text-gray-800">"Amanspices Pickles – A Taste of Tradition in Every Bite!"</h3>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg hover:shadow-md transition-shadow duration-300">
-                    <h3 className="text-base font-medium text-gray-800">"Ma Amma Ruchulu Pickles – All Types, All Tastes, All Love!"</h3>
+                    <h3 className="text-base font-medium text-gray-800">"Amanspices Pickles – All Types, All Tastes, All Love!"</h3>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg hover:shadow-md transition-shadow duration-300">
-                    <h3 className="text-base font-medium text-gray-800">"From Our Home to Yours – Ma Amma Ruchulu Pickles."</h3>
+                    <h3 className="text-base font-medium text-gray-800">"From Our Home to Yours – Amanspices Pickles."</h3>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg hover:shadow-md transition-shadow duration-300">
-                    <h3 className="text-base font-medium text-gray-800">"Ma Amma Ruchulu – Authentic Pickles, Just Like Mom Makes."</h3>
+                    <h3 className="text-base font-medium text-gray-800">"Amanspices – Authentic Pickles, Just Like Mom Makes."</h3>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg hover:shadow-md transition-shadow duration-300">
-                    <h3 className="text-base font-medium text-gray-800">"Every Jar, a Flavorful Memory – Ma Amma Ruchulu Pickles."</h3>
+                    <h3 className="text-base font-medium text-gray-800">"Every Jar, a Flavorful Memory – Amanspices Pickles."</h3>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg hover:shadow-md transition-shadow duration-300">
                     <h3 className="text-base font-medium text-gray-800">"Andariki Kavalsina Avakaya ikkada ready!"</h3>
@@ -454,7 +442,7 @@ const Home = () => {
       </section>
 
       {/* Why Maa Amma Ruchulu */}
-      <section className="py-8 px-4 sm:px-6 lg:px-8 bg-yellow-300 -mt-16">
+      <section className="py-8 px-4 sm:px-6 lg:px-8 -mt-16" style={{backgroundColor: '#98A869'}}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-3">Why Choose Maa Amma Ruchulu?</h2>
@@ -487,7 +475,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto text-center">
           <Link
             to="/products"
-            className="inline-block bg-red-600 hover:bg-primary-700 text-white font-medium py-4 px-8 rounded-lg text-lg transition-colors duration-200"
+            className="inline-block text-white font-medium py-4 px-8 rounded-lg text-lg transition-colors duration-200 border-2 border-brand-gold-300 hover:border-brand-gold-400" style={{backgroundColor: '#98A869'}}
           >
             View All Products
           </Link>

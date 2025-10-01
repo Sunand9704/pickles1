@@ -82,7 +82,7 @@ const Reviews = () => {
                   {[...Array(5)].map((_, i) => (
                     <FaStar
                       key={i}
-                      className={i < testimonial.rating ? 'text-yellow-400' : 'text-gray-300'}
+                      className={i < testimonial.rating ? 'text-brand-gold-400' : 'text-gray-300'}
                     />
                   ))}
                 </div>
@@ -137,7 +137,7 @@ const Reviews = () => {
                             key={index}
                             className={`text-2xl cursor-pointer ${
                               ratingValue <= (hover || rating)
-                                ? 'text-yellow-400'
+                                ? 'text-brand-gold-400'
                                 : 'text-gray-300'
                             }`}
                             onClick={() => setRating(ratingValue)}

@@ -214,7 +214,7 @@ const ProductDetail = () => {
                           key={i}
                           className={`text-lg ${
                             i < Math.floor(product.rating)
-                              ? 'text-yellow-400'
+                              ? 'text-brand-gold-400'
                               : 'text-gray-300'
                           }`}
                         >
@@ -304,7 +304,7 @@ const ProductDetail = () => {
                 {product.category === 'milk' ? (
                   <button
                     onClick={handleSubscribe}
-                    className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                    className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 border-2 border-brand-gold-300 hover:border-brand-gold-400"
                   >
                     <span>Subscribe Now</span>
                     <span className="text-sm bg-white/20 px-2 py-1 rounded">Subscription Only</span>
@@ -312,7 +312,7 @@ const ProductDetail = () => {
                 ) : (
                   <button
                     onClick={handleAddToCart}
-                    className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+                    className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg border-2 border-brand-gold-300 hover:border-brand-gold-400"
                   >
                     Add to Cart
                   </button>

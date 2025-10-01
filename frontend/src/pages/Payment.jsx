@@ -85,7 +85,7 @@ const Payment = () => {
           key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_rtsWNkrDp1dlT7',
           amount: razorpayOrder.data.amount,
           currency: razorpayOrder.data.currency,
-          name: 'Ma Amma Ruchulu',
+          name: 'Amanspices',
           description: 'Payment for your order',
           order_id: razorpayOrder.data.orderId,
           handler: async function (response) {
@@ -183,7 +183,7 @@ const Payment = () => {
 
   if (!orderDetails) {
     return (
-      <div className="min-h-screen bg-yellow-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8" style={{backgroundColor: '#98A869'}}>
         <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
           <div className="text-center">
             <p className="text-gray-500">Loading order details...</p>
@@ -194,7 +194,7 @@ const Payment = () => {
   }
 
   return (
-    <div className="min-h-screen bg-yellow-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8" style={{backgroundColor: '#98A869'}}>
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Details</h2>
         
@@ -265,7 +265,8 @@ const Payment = () => {
           <button
             onClick={handlePayment}
             disabled={loading}
-            className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white ${selectedPaymentMethod === 'online' ? 'bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-500' : 'bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-500'} focus:outline-none focus:ring-2 focus:ring-offset-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            style={{backgroundColor: '#98A869'}}
           >
             {loading ? 'Processing...' : selectedPaymentMethod === 'online' ? 'Pay Online' : 'Place Order'}
           </button>

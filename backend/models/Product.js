@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['Shop all', 'Veg pickles', 'Non veg pickles', 'Sweets', 'Hots', 'Powders / spices']
+    enum: ['Shop all', 'Non Veg pickles', 'Veg pickles', 'Snacks', 'Sweets', 'Masala podulu']
   },
   stock: {
     type: Number,
