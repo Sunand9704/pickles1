@@ -3,27 +3,24 @@ const crypto = require('crypto');
 require('dotenv').config();
 
 // Create reusable transporter object using SMTP transport
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-    },
-    tls: {
-        rejectUnauthorized: false // Only use this in development
-    }
-});
-
-// Verify transporter configuration
-transporter.verify(function(error, success) {
-    if (error) {
-        console.error('SMTP configuration error:', error);
-    } else {
-        console.log('SMTP server is ready to send emails');
-    }
-});
+// Only create transporter if email credentials are provided
+let transporter = null;
+if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+    transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASSWORD
+        },
+        tls: {
+            rejectUnauthorized: false // Only use this in development
+        }
+    });
+} else {
+    console.log('OTP email service disabled: EMAIL_USER and EMAIL_PASSWORD not configured');
+}
 
 // Generate reset token
 const generateResetToken = () => {
@@ -33,8 +30,9 @@ const generateResetToken = () => {
 // Send reset password email
 const sendResetPasswordEmail = async (email, type, resetToken = null) => {
     try {
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-            throw new Error('Email configuration is missing');
+        if (!transporter) {
+            console.log('Email service not configured, skipping password reset email to:', email);
+            return { messageId: 'email-disabled' };
         }
 
         let subject, html;

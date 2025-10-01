@@ -168,7 +168,7 @@ const Login = memo(() => {
           >
             {/* <img
               className="mx-auto h-16 w-auto"
-              src="/images/logo.png"
+              src="/images/Logos/logo.png"
               alt=""
             /> */}
           </motion.div>

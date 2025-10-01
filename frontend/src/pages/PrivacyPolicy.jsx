@@ -18,7 +18,7 @@ const PrivacyPolicy = () => {
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Privacy Policy</h1>
             <div className="w-20 h-1 bg-primary-600 mx-auto rounded-full mb-4"></div>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              At Ma Amma Ruchulu pickles, we take your privacy seriously. This policy outlines how we collect, use, and protect your personal information.
+              At Amanspices pickles, we take your privacy seriously. This policy outlines how we collect, use, and protect your personal information.
             </p>
           </div>
 

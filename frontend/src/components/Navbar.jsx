@@ -65,22 +65,21 @@ const Navbar = () => {
   return (
     <>
       <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-        isScrolled ? 'bg-yellow-300 shadow-md py-2' : 'bg-yellow-300/80 backdrop-blur-sm py-2'
-      }`}>
+        isScrolled ? 'shadow-md py-1' : 'backdrop-blur-sm py-1'
+      }`} style={{backgroundColor: '#98A869'}}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center">
-              <Link to="/" className="flex items-center">
-                <img 
-                  src="/images/Logos/MAR.png" 
-                  alt="pickles Logo" 
-                  className="h-14 w-auto transition-transform duration-300 hover:scale-105"
-                />
-                <span className="text-xl font-bold text-black ml-3">Ma Amma Ruchulu</span>
-              </Link>
+                <Link to="/" className="flex items-center">
+                 <img 
+                   src="/images/Logos/logo.png" 
+                   alt="AMAN SPICES AND PICKLES Logo" 
+                   className="h-24 w-auto transition-transform duration-300 hover:scale-105"
+                 />
+                 <span className="text-xl font-bold text-black ml-3">Amanspices</span>
+                </Link>
             </div>
-
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               {navLinks.map((link) => (
@@ -116,7 +115,7 @@ const Navbar = () => {
                 className="relative p-2 text-black hover:text-primary-600 transition-colors"
               >
                 <FaShoppingCart className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-brand-gold-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center border border-brand-gold-300">
                   {getCartCount()}
                 </span>
               </Link>
@@ -332,7 +331,7 @@ const Navbar = () => {
                         handleLogout();
                         setIsMobileMenuOpen(false);
                       }}
-                      className="w-full text-left px-4 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center"
+                      className="w-full text-left px-4 py-2 text-sm text-white rounded-md transition-colors flex items-center" style={{backgroundColor: '#98A869'}}
                     >
                       <FaSignOutAlt className="mr-2" />
                       <span>Logout</span>
@@ -348,7 +347,7 @@ const Navbar = () => {
       </AnimatePresence>
 
       {/* Spacer for fixed navbar */}
-      <div className="h-16"></div>
+      <div className="h-14"></div>
     </>
   );
 };
