@@ -24,7 +24,8 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS
       'http://localhost:3000',
       'http://localhost:5173',
       'http://localhost:5174',
-      'https://pickles-frontend.onrender.com'
+      'https://pickles-frontend.onrender.com',
+      'https://pickles-frontneds.onrender.com'
     ]
 );
 
