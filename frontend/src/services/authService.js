@@ -1,68 +1,4 @@
-import api from '../api/apiService';
-
-// Get API URL from environment variable or use default
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-// Create axios instance with default config
-const apiInstance = api.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Add request interceptor to add auth token
-apiInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Add response interceptor to handle errors
-apiInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response) {
-      // Handle specific error status codes
-      switch (error.response.status) {
-        case 401:
-          // Unauthorized - clear token and redirect to login
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
-          break;
-        case 403:
-          // Forbidden - show access denied message
-          console.error('Access denied');
-          break;
-        case 404:
-          // Not found - show not found message
-          console.error('Resource not found');
-          break;
-        case 500:
-          // Server error - show server error message
-          console.error('Server error');
-          break;
-        default:
-          console.error('An error occurred');
-      }
-    } else if (error.request) {
-      // The request was made but no response was received
-      console.error('No response received from server');
-    } else {
-      // Something happened in setting up the request
-      console.error('Error setting up request');
-    }
-    return Promise.reject(error);
-  }
-);
+import api from './api';
 
 const authService = {
   // Register new user
@@ -123,7 +59,7 @@ const authService = {
   // Update user profile
   updateProfile: async (userData) => {
     try {
-      const response = await apiInstance.put('/api/users/profile', userData);
+      const response = await api.put('/users/profile', userData);
       localStorage.setItem('user', JSON.stringify(response.data));
       return response.data;
     } catch (error) {
@@ -135,7 +71,7 @@ const authService = {
   // Forgot password
   forgotPassword: async (email) => {
     try {
-      const response = await apiInstance.post('/auth/forgot-password', { email });
+      const response = await api.post('/auth/forgot-password', { email });
       return response.data;
     } catch (error) {
       console.error('Forgot password error:', error);
@@ -146,7 +82,7 @@ const authService = {
   // Reset password
   resetPassword: async (token, newPassword) => {
     try {
-      const response = await apiInstance.post('/auth/reset-password', {
+      const response = await api.post('/auth/reset-password', {
         token,
         newPassword
       });
@@ -160,7 +96,7 @@ const authService = {
   // Verify OTP
   verifyOTP: async (email, otp) => {
     try {
-      const response = await apiInstance.post('/auth/verify-otp', { email, otp });
+      const response = await api.post('/auth/verify-otp', { email, otp });
       return response.data;
     } catch (error) {
       console.error('OTP verification error:', error);

@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaPause, FaPlay, FaTimes, FaEdit, FaHistory } from 'react-icons/fa';
-import axios from 'axios';
-import { products, user } from '../services/api';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import api, { products, user } from '../services/api';
 
 const statusColors = {
   active: 'bg-green-100 text-green-700',
@@ -28,8 +25,7 @@ const MySubscriptions = () => {
     try {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${API_URL}/subscriptions`, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
+      const res = await api.get('/subscriptions');
       setSubs(res.data);
     } catch (err) {
       setError('Failed to load subscriptions');
@@ -42,8 +38,7 @@ const MySubscriptions = () => {
     if (!window.confirm('Pause this subscription?')) return;
     setActionLoading({ type: 'pause', id });
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${API_URL}/subscriptions/${id}/pause`, {}, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
+      await api.patch(`/subscriptions/${id}/pause`);
       fetchSubs();
     } finally {
       setActionLoading({ type: null, id: null });
@@ -53,8 +48,7 @@ const MySubscriptions = () => {
     if (!window.confirm('Resume this subscription?')) return;
     setActionLoading({ type: 'resume', id });
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${API_URL}/subscriptions/${id}/resume`, {}, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
+      await api.patch(`/subscriptions/${id}/resume`);
       fetchSubs();
     } finally {
       setActionLoading({ type: null, id: null });
@@ -64,8 +58,7 @@ const MySubscriptions = () => {
     if (!window.confirm('Cancel this subscription? This cannot be undone.')) return;
     setActionLoading({ type: 'cancel', id });
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/subscriptions/${id}`, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
+      await api.delete(`/subscriptions/${id}`);
       fetchSubs();
     } finally {
       setActionLoading({ type: null, id: null });
