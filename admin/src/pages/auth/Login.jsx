@@ -62,9 +62,9 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <img
-          src="/images/Logos/logo.png"
+          src="/images/logo.png"
           alt="logo"
-          className="w-16 h-auto mx-auto"
+          className="h-20 mx-auto"
         />
         <div>
           <h2 className="mt-6 text-center text-4xl font-black text-red-600 transition-colors duration-200">
