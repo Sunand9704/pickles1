@@ -103,7 +103,7 @@ const Navbar = () => {
               {location.pathname === '/' && (
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className="p-2 text-black hover:text-primary-600 transition-colors"
+                className="hidden md:inline-flex p-2 text-black hover:text-primary-600 transition-colors"
               >
                 <FaSearch className="w-5 h-5" />
               </button>
@@ -112,7 +112,7 @@ const Navbar = () => {
               {/* Cart */}
               <Link
                 to="/cart"
-                className="relative p-2 text-black hover:text-primary-600 transition-colors"
+                className="relative hidden md:inline-flex p-2 text-black hover:text-primary-600 transition-colors"
               >
                 <FaShoppingCart className="w-5 h-5" />
                 <span className="absolute -top-1 -right-1 bg-brand-gold-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center border border-brand-gold-300">

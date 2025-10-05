@@ -442,10 +442,10 @@ const Home = () => {
       </section>
 
       {/* Why Maa Amma Ruchulu */}
-      <section className="py-8 px-4 sm:px-6 lg:px-8 -mt-16" style={{backgroundColor: '#98A869'}}>
+      <section className="py-8 px-4 sm:px-6 lg:px-8 mt-16" style={{backgroundColor: '#98A869'}}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Why Choose Maa Amma Ruchulu?</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Why Choose Aman Spices?</h2>
             <p className="text-base text-gray-600">Experience the difference with our premium pickle products</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

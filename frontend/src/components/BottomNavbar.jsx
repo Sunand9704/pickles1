@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaShoppingBag, FaUser, FaHistory } from 'react-icons/fa';
+import { FaHome, FaShoppingBag, FaUser, FaHistory, FaSearch, FaShoppingCart } from 'react-icons/fa';
 
 const BottomNavbar = () => {
   const location = useLocation();
@@ -10,15 +10,17 @@ const BottomNavbar = () => {
   };
 
   const navItems = [
-    { path: '/', icon: <FaHome size={24} />, label: 'Home' },
-    { path: '/products', icon: <FaShoppingBag size={24} />, label: 'Products' },
-    { path: '/orders', icon: <FaHistory size={24} />, label: 'Orders' },
-    { path: '/profile', icon: <FaUser size={24} />, label: 'Profile' }
+    { path: '/', icon: <FaHome size={22} />, label: 'Home' },
+    { path: '/products', icon: <FaSearch size={22} />, label: 'Search' },
+    { path: '/cart', icon: <FaShoppingCart size={22} />, label: 'Cart' },
+    { path: '/products', icon: <FaShoppingBag size={22} />, label: 'Products' },
+    { path: '/orders', icon: <FaHistory size={22} />, label: 'Orders' },
+    { path: '/profile', icon: <FaUser size={22} />, label: 'Profile' }
   ];
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
-      <div className="flex justify-around items-center h-16">
+      <div className="flex justify-between items-center h-16 px-1">
         {navItems.map((item) => (
           <Link
             key={item.path}
@@ -30,7 +32,7 @@ const BottomNavbar = () => {
             }`}
           >
             {item.icon}
-            <span className="text-xs mt-1">{item.label}</span>
+            <span className="text-[10px] mt-1">{item.label}</span>
           </Link>
         ))}
       </div>
