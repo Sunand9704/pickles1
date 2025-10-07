@@ -36,11 +36,11 @@ const Products = () => {
   //CAPITAL LETTERS
   const CATEGORIES = [
     "Shop all",
+    "Non Veg pickles",
     "Veg pickles",
-    "Non veg pickles",
+    "Snacks",
     "Sweets",
-    "Hots",
-    "Powders / spices",
+    "Masala podulu",
   ];
   useEffect(() => {
     const fetchProducts = async () => {

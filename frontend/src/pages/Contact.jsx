@@ -59,10 +59,9 @@ const Contact = () => {
           src="https://cdn-icons-png.flaticon.com/512/126/126341.png" 
           alt="Phone" 
           className="w-6 h-6"
-        />
-      ),
+        />),
       title: 'Phone',
-      content: '+91 970-155-5435',
+      content: '+91 9502012861',
       link: 'tel:+919701555435'
     },
     {
@@ -74,7 +73,7 @@ const Contact = () => {
         />
       ),
       title: 'Email',
-      content: 'maammaruchulu@gmail.com',
+      content: 'amanspicesandpickles@gmail.com',
       link: 'mailto:maammaruchulu@gmail.com'
     },
     {
@@ -86,7 +85,7 @@ const Contact = () => {
         />
       ),
       title: 'Address',
-      content: '4-7-62/2, Shivaji nagar, Attapur, Hyderabad-500048',
+      content: 'M/s Aman Spices and pickles Flatno.505Sai heights apartments APHB ColonyNandyal',
       link: 'https://maps.app.goo.gl/BV9XeQPSCLEXyyky7'
     },
     {
@@ -99,9 +98,9 @@ const Contact = () => {
       ),
       title: 'WhatsApp',
       content: 'Chat with us on WhatsApp',
-      link: 'https://wa.me/919701555435'
+      link: 'https://wa.me/919502012861'
     }
-  ];
+];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">

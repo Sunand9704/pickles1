@@ -2,13 +2,19 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 // Create reusable transporter object using SMTP transport
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-    }
-});
+// Only create transporter if email credentials are provided
+let transporter = null;
+if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+    transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASSWORD
+        }
+    });
+} else {
+    console.log('Email service disabled: EMAIL_USER and EMAIL_PASSWORD not configured');
+}
 
 // Email template styles
 const emailStyles = `
@@ -76,17 +82,23 @@ const emailStyles = `
 `;
 
 // Verify transporter configuration
-transporter.verify(function(error, success) {
-    if (error) {
-        console.error('Email configuration error:', error);
-    } else {
-        console.log('Email server is ready to send messages');
-    }
-});
+// Commented out to prevent startup errors when email credentials are not configured
+// transporter.verify(function(error, success) {
+//     if (error) {
+//         console.error('Email configuration error:', error);
+//     } else {
+//         console.log('Email server is ready to send messages');
+//     }
+// });
 
 // Send order confirmation email to user
 const sendOrderConfirmationToUser = async (userEmail, orderDetails) => {
     try {
+        if (!transporter) {
+            console.log('Email service not configured, skipping user email to:', userEmail);
+            return { messageId: 'email-disabled' };
+        }
+
         console.log('Preparing to send user email to:', userEmail);
 
         const mailOptions = {
@@ -109,6 +121,11 @@ const sendOrderConfirmationToUser = async (userEmail, orderDetails) => {
 // Send order notification email to admin
 const sendOrderNotificationToAdmin = async (orderDetails) => {
     try {
+        if (!transporter) {
+            console.log('Email service not configured, skipping admin email');
+            return { messageId: 'email-disabled' };
+        }
+
         console.log('Preparing to send admin email to:', process.env.ADMIN_EMAIL);
         
         const mailOptions = {

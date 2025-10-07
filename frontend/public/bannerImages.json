@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "title": "veg-pickel",
+    "image": "https://res.cloudinary.com/dd4svnumq/image/upload/v1759854689/pickles/banners/hero1.webp"
+  },
+  {
+    "id": 2,
+    "title": "leafpickel",
+    "image": "https://res.cloudinary.com/dd4svnumq/image/upload/v1759854690/pickles/banners/leafpickel.webp"
+  },
+  {
+    "id": 3,
+    "title": "Non-veg",
+    "image": "https://res.cloudinary.com/dd4svnumq/image/upload/v1759854692/pickles/banners/nons-veg.webp"
+  }
+]

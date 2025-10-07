@@ -35,11 +35,11 @@ const getStatusColor = (status) => {
     case 'confirmed':
       return 'bg-blue-100 text-blue-800';
     case 'cancelled':
-      return 'bg-red-100 text-red-800';
+      return 'text-white';
     case 'delivered':
       return 'bg-green-100 text-green-800';
     case 'pending':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'text-white';
     default:
       return 'bg-gray-100 text-gray-800';
   }
@@ -77,7 +77,7 @@ const Dashboard = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/api/dashboard/stats');
+      const response = await api.get('/dashboard/stats');
       
       if (!response.data) {
         throw new Error('No data received from server');
@@ -388,7 +388,10 @@ const Dashboard = () => {
                         <td className="px-4 py-2">{order.user?.name || 'Unknown User'}</td>
                         <td className="px-4 py-2">₹{order.totalAmount}</td>
                         <td className="px-4 py-2">
-                          <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(order.status)}`}>
+                          <span 
+                            className={`px-2 py-1 rounded-full text-xs ${getStatusColor(order.status)}`}
+                            style={order.status === 'pending' || order.status === 'cancelled' ? {backgroundColor: '#98A869'} : {}}
+                          >
                             {order.status}
                           </span>
                         </td>

@@ -165,13 +165,9 @@ const Profile = () => {
       navigate('/login');
       return;
     }
-
-    // Add a small delay before fetching to prevent rapid requests
-    // const timer = setTimeout(() => {
-      fetchUserData();
-    // }, 500);
-     console.log("form Data in useEffect", formData);
-    // return () => clearTimeout(timer);
+    if (window.__fetchedProfileOnce) return;
+    window.__fetchedProfileOnce = true;
+    fetchUserData();
   }, [isAuthenticated, navigate]);
 
   const fetchUserData = async () => {

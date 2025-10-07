@@ -40,9 +40,9 @@ const Loader = ({ size = 'large', text = 'Loading...' }) => {
 const statusStyles = {
   delivered: 'bg-green-100 text-green-800',
   processing: 'bg-blue-100 text-blue-800',
-  out_for_delivery: 'bg-yellow-100 text-yellow-800',
-  'out for delivery': 'bg-yellow-100 text-yellow-800',
-  pending: 'bg-gray-100 text-gray-800',
+  out_for_delivery: 'text-white',
+  'out for delivery': 'text-white',
+  pending: 'text-white',
   cancelled: 'bg-red-100 text-red-800',
 };
 
@@ -91,10 +91,10 @@ const Orders = () => {
 
   const getStatusColor = (status) => {
     const colors = {
-      pending: 'bg-yellow-100 text-yellow-800',
+      pending: 'text-white',
       confirmed: 'bg-blue-100 text-blue-800',
       preparing: 'bg-purple-100 text-purple-800',
-      out_for_delivery: 'bg-orange-100 text-orange-800',
+      out_for_delivery: 'text-white',
       delivered: 'bg-green-100 text-green-800',
       cancelled: 'bg-red-100 text-red-800'
     };
@@ -265,7 +265,10 @@ const Orders = () => {
                         Placed on {new Date(order.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+                    <span 
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}
+                      style={order.status === 'pending' || order.status === 'out_for_delivery' ? {backgroundColor: '#98A869'} : {}}
+                    >
                       {order.status.replace(/_/g, ' ').toUpperCase()}
                     </span>
                   </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { Button, Card, Alert, Spinner, Form, Row, Col } from 'react-bootstrap';
 
 const TestEmail = () => {
@@ -28,7 +28,7 @@ const TestEmail = () => {
     useEffect(() => {
         const fetchRecentOrders = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/orders/recent');
+                const response = await api.get('/orders/recent');
                 setRecentOrders(response.data.orders);
             } catch (err) {
                 console.error('Error fetching recent orders:', err);
@@ -68,7 +68,7 @@ const TestEmail = () => {
             setError(null);
             setResult(null);
 
-            const response = await axios.get('http://localhost:5000/api/test/test-email');
+            const response = await api.get('/test/test-email');
             setResult(response.data);
         } catch (err) {
             setError(err.response?.data || { error: 'Failed to test email' });

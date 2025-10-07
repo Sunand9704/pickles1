@@ -53,7 +53,7 @@ const ImageModal = ({ isOpen, onClose, product, quantities, handleQuantityChange
             {/* Product Details Section */}
             <div className="flex flex-col justify-between">
               <div>
-                <h2 className="text-base md:text-2xl font-semibold text-gray-800 mb-0.5 md:mb-2 bg-yellow-200 inline-block">{product?.name}</h2>
+                <h2 className="text-base md:text-2xl font-semibold text-white mb-0.5 md:mb-2 inline-block px-2 py-1 rounded" style={{backgroundColor: '#98A869'}}>{product?.name}</h2>
                 {/* Sales Information (Placeholder) */}
                 
                 {/* Limited Time Deal (Placeholder) */}
@@ -122,7 +122,7 @@ const ImageModal = ({ isOpen, onClose, product, quantities, handleQuantityChange
                 {/* Product Rating and Reviews */}
                 {product?.rating && product?.reviews !== undefined && (
                   <div className="flex items-center mb-1.5 md:mb-4">
-                    <div className="flex text-yellow-400 mr-0.5 md:mr-2">
+                    <div className="flex mr-0.5 md:mr-2 text-brand-gold-400">
                       {[...Array(5)].map((_, i) => (
                         <svg
                           key={i}
@@ -145,7 +145,7 @@ const ImageModal = ({ isOpen, onClose, product, quantities, handleQuantityChange
                   handleAddToCart(product);
                   onClose();
                 }}
-                className="w-full bg-primary-600 text-white px-3 py-1.5 rounded-lg hover:bg-primary-700 transition-colors font-medium text-[10px] md:text-base"
+                className="w-full bg-primary-600 text-white px-3 py-1.5 rounded-lg hover:bg-primary-700 transition-colors font-medium text-[10px] md:text-base border-2 border-brand-gold-300 hover:border-brand-gold-400"
               >
                 Add to Cart
               </button>
@@ -176,11 +176,11 @@ const Products = () => {
 
   const categories = [
     { id: 'all', name: 'All Products', icon: 'https://cdn-icons-png.flaticon.com/128/6785/6785304.png', description: 'Browse all our delicious pickles and other food items.'},
-    { id: 'Veg pickles', name: 'Veg Pickles', icon: '/images/veg/veg1.jpg', description: 'Explore our wide range of authentic and delicious vegetarian pickles, crafted with traditional recipes and fresh ingredients. Perfect for adding a tangy kick to any meal!'},
-    { id: 'Non veg pickles', name: 'Non-Veg Pickles', icon: '/images/Non-veg/Non-veg1.jpg', description: 'Discover our savory non-vegetarian pickles, made with high-quality meats and rich spices. A perfect accompaniment for a hearty meal.'},
+    { id: 'Non Veg pickles', name: 'Non Veg pickles', icon: '/images/Non-veg/Non-veg1.jpg', description: 'Discover our savory non-vegetarian pickles, made with high-quality meats and rich spices. A perfect accompaniment for a hearty meal.'},
+    { id: 'Veg pickles', name: 'Veg pickles', icon: '/images/veg/veg1.jpg', description: 'Explore our wide range of authentic and delicious vegetarian pickles, crafted with traditional recipes and fresh ingredients. Perfect for adding a tangy kick to any meal!'},
+    { id: 'Snacks', name: 'Snacks', icon: '/images/Hots/hot1.jpg', description: 'Tasty and crunchy snacks to complement your meals and tea time.'},
     { id: 'Sweets', name: 'Sweets', icon: '/images/Sweets/swt1.jpg', description: 'Indulge in our delightful selection of traditional Indian sweets, handcrafted to perfection for your festive and daily cravings.'},
-    { id: 'Hots', name: 'Hots', icon: '/images/Hots/hot1.jpg', description: 'Spice up your life with our fiery collection of hot and spicy condiments. Ideal for those who love an extra kick in their food.'},
-    { id: 'Powders / spices', name: 'Powders / Spices', icon: '/images/Ingredients/Ing1.webp', description: 'Enhance your cooking with our aromatic range of natural spice powders and blends, ground fresh for maximum flavor.'}
+    { id: 'Masala podulu', name: 'Masala podulu', icon: '/images/Ingredients/Ing1.webp', description: 'Enhance your cooking with our aromatic range of freshly ground spice powders.'}
   ];
 
   const allTags = [...new Set(products.flatMap(product => product.tags))];

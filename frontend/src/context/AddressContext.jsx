@@ -12,10 +12,12 @@ export const AddressProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Fetch addresses once on login; avoid repeated calls due to re-renders
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchAddresses();
-    }
+    if (!isAuthenticated) return;
+    if (window.__fetchedAddressesOnce) return;
+    window.__fetchedAddressesOnce = true;
+    fetchAddresses();
   }, [isAuthenticated]);
 
   const fetchAddresses = async () => {

@@ -52,8 +52,8 @@ const OTPPopup = ({ otp, onClose }) => {
             </div>
           </div>
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-yellow-800">
+          <div className="border rounded-lg p-4 mb-6" style={{backgroundColor: '#98A869', borderColor: '#98A869'}}>
+            <p className="text-sm text-white">
               ⚠️ Please keep this OTP handy for delivery verification.
             </p>
           </div>

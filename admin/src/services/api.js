@@ -1,5 +1,4 @@
 import axios from 'axios';
-import Dashboard from '../../../../frontend/src/pages/Dashboard';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -98,10 +97,10 @@ const adminApi = {
     resume: (id) => api.post(`/api/subscriptions/${id}/resume`),
   },
 
-Dashboard:{
-  getAll:() =>api.get('/api/dashboard/stats'),
-
-},
+  // Dashboard
+  dashboard: {
+    getStats: () => api.get('/api/dashboard/stats'),
+  },
 
 };
 

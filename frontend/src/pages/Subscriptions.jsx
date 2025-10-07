@@ -2,14 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaPause, FaPlay, FaTimes, FaEdit, FaHistory } from 'react-icons/fa';
-import axios from 'axios';
-import { products, user } from '../services/api';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import api, { products, user } from '../services/api';
 
 const statusColors = {
   active: 'bg-green-100 text-green-700',
-  paused: 'bg-yellow-100 text-yellow-700',
+  paused: 'text-white',
   cancelled: 'bg-red-100 text-red-700',
   expired: 'bg-gray-100 text-gray-500'
 };
@@ -28,8 +25,7 @@ const MySubscriptions = () => {
     try {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${API_URL}/subscriptions`, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
+      const res = await api.get('/subscriptions');
       setSubs(res.data);
     } catch (err) {
       setError('Failed to load subscriptions');
@@ -42,8 +38,7 @@ const MySubscriptions = () => {
     if (!window.confirm('Pause this subscription?')) return;
     setActionLoading({ type: 'pause', id });
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${API_URL}/subscriptions/${id}/pause`, {}, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
+      await api.patch(`/subscriptions/${id}/pause`);
       fetchSubs();
     } finally {
       setActionLoading({ type: null, id: null });
@@ -53,8 +48,7 @@ const MySubscriptions = () => {
     if (!window.confirm('Resume this subscription?')) return;
     setActionLoading({ type: 'resume', id });
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${API_URL}/subscriptions/${id}/resume`, {}, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
+      await api.patch(`/subscriptions/${id}/resume`);
       fetchSubs();
     } finally {
       setActionLoading({ type: null, id: null });
@@ -64,8 +58,7 @@ const MySubscriptions = () => {
     if (!window.confirm('Cancel this subscription? This cannot be undone.')) return;
     setActionLoading({ type: 'cancel', id });
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/subscriptions/${id}`, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
+      await api.delete(`/subscriptions/${id}`);
       fetchSubs();
     } finally {
       setActionLoading({ type: null, id: null });
@@ -106,10 +99,10 @@ const MySubscriptions = () => {
                       <div className="text-xs text-green-700 mt-1">Next delivery OTP will be generated at 5 AM</div>
                     </div>
                   ) : sub.otp ? (
-                    <div className="mt-3 p-3 bg-yellow-50 rounded-lg">
-                      <div className="font-semibold text-yellow-800">Today's Delivery OTP:</div>
-                      <div className="text-2xl font-bold text-yellow-900 mt-1">{sub.otp}</div>
-                      <div className="text-xs text-yellow-700 mt-1">Show this OTP to the delivery person</div>
+                    <div className="mt-3 p-3 rounded-lg" style={{backgroundColor: '#98A869'}}>
+                      <div className="font-semibold text-white">Today's Delivery OTP:</div>
+                      <div className="text-2xl font-bold text-white mt-1">{sub.otp}</div>
+                      <div className="text-xs text-white mt-1">Show this OTP to the delivery person</div>
                     </div>
                   ) : (
                     <div className="mt-3 p-3 bg-gray-50 rounded-lg">
@@ -122,13 +115,13 @@ const MySubscriptions = () => {
             </div>
             <div className="flex gap-2 mt-4">
               {sub.status === 'active' && (
-                <button onClick={() => handlePause(sub._id)} disabled={actionLoading.type==='pause'&&actionLoading.id===sub._id} className="px-4 py-2 bg-yellow-100 text-yellow-700 rounded flex items-center gap-1"><FaPause /> Pause</button>
+                <button onClick={() => handlePause(sub._id)} disabled={actionLoading.type==='pause'&&actionLoading.id===sub._id} className="px-4 py-2 text-white rounded flex items-center gap-1" style={{backgroundColor: '#98A869'}}><FaPause /> Pause</button>
               )}
               {sub.status === 'paused' && (
                 <button onClick={() => handleResume(sub._id)} disabled={actionLoading.type==='resume'&&actionLoading.id===sub._id} className="px-4 py-2 bg-green-100 text-green-700 rounded flex items-center gap-1"><FaPlay /> Resume</button>
               )}
               {sub.status !== 'cancelled' && (
-                <button onClick={() => handleCancel(sub._id)} disabled={actionLoading.type==='cancel'&&actionLoading.id===sub._id} className="px-4 py-2 bg-red-100 text-red-700 rounded flex items-center gap-1"><FaTimes /> Cancel</button>
+                <button onClick={() => handleCancel(sub._id)} disabled={actionLoading.type==='cancel'&&actionLoading.id===sub._id} className="px-4 py-2 text-white rounded flex items-center gap-1" style={{backgroundColor: '#98A869'}}><FaTimes /> Cancel</button>
               )}
               <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded flex items-center gap-1" disabled><FaHistory /> History</button>
             </div>
@@ -263,7 +256,7 @@ const Subscriptions = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b bg-yellow-100 to-white py-12">
+    <div className="min-h-screen bg-gradient-to-b py-12" style={{background: 'linear-gradient(to bottom, #98A869, white)'}}>
       <div className="container mx-auto px-4">
         <div className="max-w-7xl mx-auto">
           {/* My Subscriptions Section */}
@@ -354,7 +347,7 @@ const Subscriptions = () => {
                   </div>
                   <button
                     onClick={() => handleSubscribe(plan)}
-                    className="w-full py-3 px-6 rounded-lg bg-red-600 text-white font-medium hover:bg-primary-700 transition-colors"
+                    className="w-full py-3 px-6 rounded-lg text-white font-medium transition-colors border-2 border-brand-gold-300 hover:border-brand-gold-400" style={{backgroundColor: '#98A869'}}
                   >
                     Subscribe Now
                   </button>
