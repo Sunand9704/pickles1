@@ -66,7 +66,7 @@ const Navbar = () => {
     <>
       <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
         isScrolled ? 'shadow-md py-1' : 'backdrop-blur-sm py-1'
-      }`} style={{backgroundColor: '#98A869'}}>
+      }`} style={{backgroundColor: '#a78bfa'}}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
@@ -75,7 +75,7 @@ const Navbar = () => {
                  <img 
                    src="/images/Logos/logo.png" 
                    alt="AMAN SPICES AND PICKLES Logo" 
-                   className="h-24 w-auto transition-transform duration-300 hover:scale-105"
+                   className="h-12 w-auto transition-transform duration-300 hover:scale-105"
                  />
                  <span className="text-xl font-bold text-black ml-3">Amanspices</span>
                 </Link>

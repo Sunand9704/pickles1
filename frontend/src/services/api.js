@@ -1,8 +1,10 @@
 import axios from 'axios';
 
 // Create axios instance with default config
+//render url : "https://pickles-backend.onrender.com/api"
+//localhost url : "http://localhost:5000/api"
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://pickles-backend.onrender.com/api',
+  baseURL: "https://pickles-backend.onrender.com/api",
   headers: {
     'Content-Type': 'application/json',
   },
@@ -27,8 +29,13 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Prevent multiple simultaneous redirects on auth expiry
+      if (!window.__isRedirecting401) {
+        window.__isRedirecting401 = true;
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

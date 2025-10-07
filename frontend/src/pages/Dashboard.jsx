@@ -77,7 +77,7 @@ const Dashboard = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/api/dashboard/stats');
+      const response = await api.get('/dashboard/stats');
       
       if (!response.data) {
         throw new Error('No data received from server');
