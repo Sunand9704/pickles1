@@ -8,6 +8,7 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [editingProductId, setEditingProductId] = useState(null);
   const toastShownRef = useRef(false);
   const [formData, setFormData] = useState({
@@ -134,6 +135,7 @@ const Products = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setIsSaving(true);
       const formDataToSend = new FormData();
 
       // Append all form fields
@@ -175,6 +177,8 @@ const Products = () => {
     } catch (error) {
       console.error("Failed to save product:", error);
       toast.error(error.response?.data?.error || "Failed to save product");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -350,10 +354,10 @@ const Products = () => {
       {/* Add Product Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="p-4 md:p-6">
+          <div className="relative bg-white rounded-2xl w-full max-w-lg max-h-[92vh] shadow-2xl overflow-hidden">
+            <div className="px-5 py-4 border-b sticky top-0 bg-white z-10">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-800">
+                <h2 className="text-xl font-bold text-gray-900">
                   {editingProductId ? "Edit Product" : "Add New Product"}
                 </h2>
                 <button
@@ -378,7 +382,9 @@ const Products = () => {
                   </svg>
                 </button>
               </div>
-              <form onSubmit={handleSubmit} className="space-y-0">
+            </div>
+            <div className="p-4 md:p-6 overflow-y-auto max-h-[calc(92vh-64px)]">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Product Name
@@ -389,7 +395,8 @@ const Products = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    disabled={isSaving}
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     required
                   />
                 </div>
@@ -402,7 +409,8 @@ const Products = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    disabled={isSaving}
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     rows="3"
                     required
                   />
@@ -417,7 +425,8 @@ const Products = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, price: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    disabled={isSaving}
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     required
                   />
                 </div>
@@ -431,7 +440,8 @@ const Products = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    disabled={isSaving}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     required
                   >
                     {CATEGORIES.map((category) => (
@@ -451,7 +461,8 @@ const Products = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, stock: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    disabled={isSaving}
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     required
                   />
                 </div>
@@ -464,7 +475,8 @@ const Products = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, unit: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    disabled={isSaving}
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     required
                   >
                     <option value="">Select Unit</option>
@@ -490,6 +502,7 @@ const Products = () => {
                           type="button"
                           onClick={() => removeImage(index)}
                           className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                          disabled={isSaving}
                         >
                           ×
                         </button>
@@ -504,6 +517,7 @@ const Products = () => {
                             multiple
                             onChange={handleImageChange}
                             className="hidden"
+                            disabled={isSaving}
                           />
                           <div className="text-gray-500">
                             <svg
@@ -543,7 +557,8 @@ const Products = () => {
                         isDiscountActive: discount > 0,
                       });
                     }}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    disabled={isSaving}
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   />
                 </div>
 
@@ -562,7 +577,8 @@ const Products = () => {
                             discountStartDate: e.target.value,
                           })
                         }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        disabled={isSaving}
+                        className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                       />
                     </div>
 
@@ -579,7 +595,8 @@ const Products = () => {
                             discountEndDate: e.target.value,
                           })
                         }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        disabled={isSaving}
+                        className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                       />
                     </div>
 
@@ -602,21 +619,41 @@ const Products = () => {
                       setIsModalOpen(false);
                       setEditingProductId(null);
                     }}
-                    className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200"
+                    disabled={isSaving}
+                    className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200 disabled:opacity-60"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-200"
+                    disabled={isSaving}
+                    className="flex-1 bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-200 disabled:opacity-60 flex items-center justify-center gap-2"
                   >
-                    {editingProductId ? "Update Product" : "Add Product"}
+                    {isSaving && (
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    )}
+                    {isSaving ? "Saving..." : (editingProductId ? "Update Product" : "Add Product")}
                   </button>
                 </div>
               </form>
             </div>
+
+            {isSaving && (
+              <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-2">
+                  <svg className="animate-spin h-8 w-8 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span className="text-sm text-gray-700">Saving product...</span>
+                </div>
+              </div>
+            )}
+            </div>
           </div>
-        </div>
       )}
     </div>
   );
