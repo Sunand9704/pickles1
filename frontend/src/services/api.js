@@ -1,10 +1,12 @@
 import axios from 'axios';
 
-// Create axios instance with default config
-//render url : "https://pickles-backend.onrender.com/api"
-//localhost url : "http://localhost:5000/api"
+// Unified API base URL for all frontend calls
+// Prefer VITE_API_BASE_URL (e.g., https://your-backend.com/api),
+// fallback to existing production default
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://pickles-backend.onrender.com/api';
+
 const api = axios.create({
-  baseURL: "https://pickles-backend.onrender.com/api",
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
