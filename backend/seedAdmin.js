@@ -10,7 +10,7 @@ const ADMIN_CREDENTIALS = {
   name: 'Admin User',
   email: 'admin@amanspices.com',
   password: 'Admin@123',
-  phone: '+91 9876543210',
+  phone: '+91 9502012861',
   role: 'admin'
 };
 
@@ -32,7 +32,6 @@ async function seedAdmin() {
       console.log('Name:', existingAdmin.name);
       return;
     }
-
     // Create new admin user
     const adminUser = new User({
       name: ADMIN_CREDENTIALS.name,
@@ -41,7 +40,6 @@ async function seedAdmin() {
       role: ADMIN_CREDENTIALS.role,
       isActive: true
     });
-
     // Hash password
     const salt = await bcrypt.genSalt(10);
     adminUser.password = await bcrypt.hash(ADMIN_CREDENTIALS.password, salt);

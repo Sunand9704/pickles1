@@ -63,7 +63,7 @@ const ImageModal = ({ isOpen, onClose, product, quantities, handleQuantityChange
                   </span>
                 )}
 
-                <p className="text-[10px] md:text-gray-600 mb-1.5 md:mb-4">{categoryDescription}</p>
+                <p className="text-[10px] md:text-gray-600 mb-1.5 md:mb-4">{product?.description || categoryDescription}</p>
                 
                 {/* Product Tags */}
                 {product?.tags && product.tags.length > 0 && (

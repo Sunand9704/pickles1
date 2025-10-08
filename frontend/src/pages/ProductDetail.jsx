@@ -255,8 +255,8 @@ const ProductDetail = () => {
 
               <div className="mt-4">
                 <p className="text-gray-600">
-                  {showFullDescription ? product.description : product.shortDescription}
-                  {product.description !== product.shortDescription && (
+                  {showFullDescription ? (product.description || product.shortDescription) : (product.shortDescription || product.description)}
+                  {(product.description && product.shortDescription && product.description !== product.shortDescription) && (
                     <button
                       onClick={() => setShowFullDescription(!showFullDescription)}
                       className="ml-1 text-primary-600 hover:text-primary-700 font-medium"

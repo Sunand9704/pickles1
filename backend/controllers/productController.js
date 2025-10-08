@@ -1,6 +1,32 @@
 const Product = require('../models/Product');
 const path = require('path');
 const fs = require('fs').promises;
+const cloudinary = require('cloudinary').v2;
+require('dotenv').config();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const CLOUDINARY_PRODUCTS_FOLDER = process.env.CLOUDINARY_PRODUCTS_FOLDER || 'pickles/products';
+
+async function uploadLocalFileToCloudinary(relativeFilePath) {
+  // relativeFilePath is relative to backend root (due to convertToRelativePath). Build absolute.
+  const absolutePath = path.join(__dirname, '..', relativeFilePath);
+  const fileName = path.parse(relativeFilePath).name;
+  const publicId = `${CLOUDINARY_PRODUCTS_FOLDER}/${fileName}`;
+  const result = await cloudinary.uploader.upload(absolutePath, {
+    folder: CLOUDINARY_PRODUCTS_FOLDER,
+    public_id: fileName,
+    overwrite: true,
+    resource_type: 'image',
+  });
+  // Clean up local file quietly
+  try { await fs.unlink(absolutePath); } catch (_) {}
+  return result.secure_url;
+}
 
 // Get all products
 exports.getAllProducts = async (req, res) => {
@@ -32,8 +58,15 @@ exports.createProduct = async (req, res) => {
       isOfferActive
     } = req.body;
 
-    // Handle image uploads
-    const images = req.files ? req.files.map(file => file.path) : [];
+    // Handle image uploads -> upload to Cloudinary and store URLs
+    let images = [];
+    if (req.files && req.files.length > 0) {
+      const uploads = [];
+      for (const file of req.files) {
+        uploads.push(uploadLocalFileToCloudinary(file.path));
+      }
+      images = await Promise.all(uploads);
+    }
 
     const product = new Product({
       name,
@@ -66,27 +99,14 @@ exports.updateProduct = async (req, res) => {
     const productId = req.params.id;
     const updateData = { ...req.body };
 
-    // Handle new image uploads
+    // Handle new image uploads: upload to Cloudinary and replace images array
     if (req.files && req.files.length > 0) {
-      const newImages = req.files.map(file => file.path);
-      
-      // Get existing product to handle old images
-      const existingProduct = await Product.findById(productId);
-      if (existingProduct) {
-        // Delete old images that are not in the new set
-        const oldImages = existingProduct.images || [];
-        for (const oldImage of oldImages) {
-          if (!newImages.includes(oldImage)) {
-            try {
-              await fs.unlink(oldImage);
-            } catch (err) {
-              console.error('Error deleting old image:', err);
-            }
-          }
-        }
+      const newImageUrls = [];
+      for (const file of req.files) {
+        const url = await uploadLocalFileToCloudinary(file.path);
+        newImageUrls.push(url);
       }
-      
-      updateData.images = newImages;
+      updateData.images = newImageUrls;
     }
 
     const product = await Product.findByIdAndUpdate(
