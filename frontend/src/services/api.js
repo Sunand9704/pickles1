@@ -42,7 +42,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 // Auth API calls
 export const auth = {
   login: async (credentials) => {
