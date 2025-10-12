@@ -60,6 +60,29 @@ const sendResetPasswordEmail = async (email, type, resetToken = null) => {
                     <p style="color: #666; font-size: 14px; word-break: break-all;">${resetLink}</p>
                 </div>
             `;
+        } else if (type === 'admin_reset_request') {
+            if (!process.env.FRONTEND_URL) {
+                throw new Error('Frontend URL is not configured');
+            }
+            const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+            subject = 'Admin Password Reset Request';
+            html = `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+                    <h2 style="color: #333; text-align: center;">Admin Password Reset</h2>
+                    <p>We received a request to reset your admin password. Click the button below to create a new password:</p>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${resetLink}" style="background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+                            Reset Admin Password
+                        </a>
+                    </div>
+
+                    <p style="color: #666; font-size: 14px;">This link will expire in 10 minutes.</p>
+                    <p style="color: #666; font-size: 14px;">If you did not request this password reset, please ignore this email.</p>
+                    <p style="color: #666; font-size: 14px;">If the button above doesn't work, copy and paste this link into your browser:</p>
+                    <p style="color: #666; font-size: 14px; word-break: break-all;">${resetLink}</p>
+                </div>
+            `;
         } else if (type === 'password_reset_confirmation') {
             subject = 'Password Reset Successful';
             html = `
@@ -72,6 +95,20 @@ const sendResetPasswordEmail = async (email, type, resetToken = null) => {
                     </div>
 
                     <p style="color: #666; font-size: 14px;">If you need any assistance, please don't hesitate to contact our support team.</p>
+                </div>
+            `;
+        } else if (type === 'admin_password_reset_confirmation') {
+            subject = 'Admin Password Reset Successful';
+            html = `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+                    <h2 style="color: #333; text-align: center;">Admin Password Reset Successful</h2>
+                    <p>Your admin password has been successfully reset. If you did not make this change, please contact the system administrator immediately.</p>
+                    
+                    <div style="margin: 30px 0; padding: 20px; background-color: #fef2f2; border-radius: 4px; border-left: 4px solid #dc2626;">
+                        <p style="color: #666; font-size: 14px; margin: 0;">For security reasons, please keep your admin password confidential and do not share it with anyone.</p>
+                    </div>
+
+                    <p style="color: #666; font-size: 14px;">If you need any assistance, please don't hesitate to contact the system administrator.</p>
                 </div>
             `;
         }

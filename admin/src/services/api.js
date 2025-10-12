@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Single base URL for admin. Prefer VITE_API_BASE_URL, else VITE_API_URL, else localhost.
-const API_URL = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://pickles-backend.onrender.com/api');
+const API_URL = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://pickles-backend.onrender.com/');
+// const API_URL = "http://localhost:5000/"
 
 const api = axios.create({
   baseURL: API_URL,
@@ -41,9 +42,11 @@ api.interceptors.response.use(
 const adminApi = {
   // Auth
   auth: {
-    login: (credentials) => api.post('/api/auth/login', credentials),
+    login: (credentials) => api.post('/api/admin/auth/login', credentials),
     logout: () => api.post('/api/auth/logout'),
     getProfile: () => api.get('/api/users/profile'),
+    forgotPassword: (email) => api.post('/api/admin/auth/forgot-password', email),
+    resetPassword: (data) => api.post('/api/admin/auth/reset-password', data),
   },
 
   // Users

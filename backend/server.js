@@ -7,6 +7,7 @@ const path = require('path');
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const adminAuthRoutes = require('./routes/adminAuth');
 const userRoutes = require('./routes/users');
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');
@@ -70,6 +71,7 @@ fs.chmodSync(productsDir, '755');
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
