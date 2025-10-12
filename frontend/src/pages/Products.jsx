@@ -19,6 +19,15 @@ const getImageUrl = (img) => {
 
 // Image Modal Component
 const ImageModal = ({ isOpen, onClose, product, quantities, handleQuantityChange, handleAddToCart, categories }) => {
+  const [selectedImage, setSelectedImage] = useState(0);
+  
+  // Reset selected image when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedImage(0);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const categoryDescription = categories.find(cat => cat.id === product?.category)?.description || '';
@@ -39,16 +48,86 @@ const ImageModal = ({ isOpen, onClose, product, quantities, handleQuantityChange
             {/* Image Section */}
             <div className="relative">
               <img
-                src={product?.images?.[0] ? getImageUrl(product.images[0]) : '/placeholder.png'}
+                src={product?.images?.[selectedImage] ? getImageUrl(product.images[selectedImage]) : '/placeholder.png'}
                 alt={product?.name}
                 className="w-full h-auto max-h-[35vh] md:max-h-[60vh] object-contain rounded-lg"
               />
+              
+              {/* Left Navigation Button */}
+              {(product?.images || []).length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImage(prev => 
+                      prev === 0 ? (product.images || []).length - 1 : prev - 1
+                    );
+                  }}
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-1.5 md:p-2 rounded-full transition-all duration-200"
+                  aria-label="Previous image"
+                >
+                  <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Right Navigation Button */}
+              {(product?.images || []).length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImage(prev => 
+                      prev === (product.images || []).length - 1 ? 0 : prev + 1
+                    );
+                  }}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-1.5 md:p-2 rounded-full transition-all duration-200"
+                  aria-label="Next image"
+                >
+                  <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Image Counter */}
+              {(product?.images || []).length > 1 && (
+                <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded-full text-xs">
+                  {selectedImage + 1} / {(product?.images || []).length}
+                </div>
+              )}
+
               {product?.discount > 0 && (
                 <div className="absolute top-0.5 right-0.5 bg-red-500 text-white px-1.5 py-0.5 rounded-full text-[9px] md:text-sm font-medium">
                   {product.discount}% OFF
                 </div>
               )}
             </div>
+
+            {/* Thumbnail Navigation */}
+            {(product?.images || []).length > 1 && (
+              <div className="flex gap-1 md:gap-2 overflow-x-auto mt-2 pb-1">
+                {(product?.images || []).map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImage(index);
+                    }}
+                    className={`relative flex-shrink-0 w-8 h-8 md:w-12 md:h-12 rounded overflow-hidden ${
+                      selectedImage === index 
+                        ? 'ring-2 ring-blue-500' 
+                        : 'ring-1 ring-gray-200'
+                    }`}
+                  >
+                    <img
+                      src={getImageUrl(image)}
+                      alt={`${product?.name} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Product Details Section */}
             <div className="flex flex-col justify-between">
