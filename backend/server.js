@@ -25,7 +25,9 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS
       'http://localhost:5173',
       'http://localhost:5174',
       'https://pickles-frontend.onrender.com',
-      'https://pickles-frontneds.onrender.com'
+      'https://pickles-frontneds.onrender.com',
+	"https://amanspicess.com",
+	"https://admin.amanspicess.com",
     ]
 );
 
@@ -101,7 +103,7 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
     // Start server
-    const PORT = process.env.PORT || 5000;
+    const PORT = process.env.PORT || 5012;
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
