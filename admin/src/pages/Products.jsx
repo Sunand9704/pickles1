@@ -10,6 +10,7 @@ const Products = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingProductId, setEditingProductId] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("Shop all");
   const toastShownRef = useRef(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -43,33 +44,42 @@ const Products = () => {
     "Sweets",
     "Masala podulu",
   ];
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setIsLoading(true);
-      try {
-        const response = await adminApi.products.getAll();
-        setProducts(response.data);
-        if (!toastShownRef.current) {
-          toast.success("Products loaded successfully");
-          toastShownRef.current = true;
-        }
-      } catch (error) {
-        console.error("Failed to load products:", error);
-        if (!toastShownRef.current) {
-          toast.error("Failed to load products");
-          toastShownRef.current = true;
-        }
-      } finally {
-        setIsLoading(false);
+  const fetchProducts = async (category = selectedCategory) => {
+    setIsLoading(true);
+    try {
+      let response;
+      if (category === "Shop all") {
+        response = await adminApi.products.getAll();
+      } else {
+        response = await adminApi.products.getByCategory(category);
       }
-    };
+      setProducts(response.data);
+      if (!toastShownRef.current) {
+        toast.success("Products loaded successfully");
+        toastShownRef.current = true;
+      }
+    } catch (error) {
+      console.error("Failed to load products:", error);
+      if (!toastShownRef.current) {
+        toast.error("Failed to load products");
+        toastShownRef.current = true;
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchProducts();
 
     return () => {
       toastShownRef.current = false;
     };
-  }, []);
+  }, [selectedCategory]);
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+  };
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -169,8 +179,7 @@ const Products = () => {
       }
 
       // Refresh products list
-      const productsResponse = await adminApi.products.getAll();
-      setProducts(productsResponse.data);
+      await fetchProducts();
 
       setIsModalOpen(false);
       setEditingProductId(null);
@@ -215,8 +224,7 @@ const Products = () => {
       await adminApi.products.delete(productId);
 
       // Refresh products list
-      const response = await adminApi.products.getAll();
-      setProducts(response.data);
+      await fetchProducts();
 
       toast.success("Product deleted successfully");
     } catch (error) {
@@ -280,9 +288,49 @@ const Products = () => {
         </button>
       </div>
 
+      {/* Category Filter */}
+      <div className="mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <label className="text-sm font-medium text-gray-700">
+            Filter by Category:
+          </label>
+          <select
+            value={selectedCategory}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white min-w-[200px]"
+          >
+            {CATEGORIES.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          <div className="text-sm text-gray-600">
+            {products.length} product{products.length !== 1 ? 's' : ''} found
+          </div>
+        </div>
+      </div>
+
       {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
-        {products.map((product) => (
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="flex flex-col items-center gap-4">
+            <svg className="animate-spin h-8 w-8 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span className="text-gray-600">Loading products...</span>
+          </div>
+        </div>
+      ) : products.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="text-gray-500 text-lg">
+            No products found for the selected category.
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
+          {products.map((product) => (
           <div
             key={product._id}
             className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden flex flex-col"
@@ -349,7 +397,8 @@ const Products = () => {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       {/* Add Product Modal */}
       {isModalOpen && (
