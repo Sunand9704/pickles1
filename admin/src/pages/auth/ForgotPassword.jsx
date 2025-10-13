@@ -18,13 +18,16 @@ const ForgotPassword = () => {
       const res = await adminApi.auth.forgotPassword({ email });
 
       // 👇 Show success message
-      toast.success(res.data.message || "Reset link sent to your email");
-
-      // 👇 Redirect to login after 2 seconds
-      setTimeout(() => navigate("/login"), 2000);
+      if (res.data.success) {
+        toast.success(res.data.message || "Reset link sent to your email");
+        // 👇 Redirect to login after 2 seconds
+        setTimeout(() => navigate("/login"), 2000);
+      } else {
+        toast.error(res.data.error || "Failed to send reset link");
+      }
     } catch (err) {
       // 👇 Handle error
-      toast.error(err.response?.data?.message || "Failed to send reset link");
+      toast.error(err.response?.data?.error || "Failed to send reset link");
     } finally {
       setLoading(false);
     }

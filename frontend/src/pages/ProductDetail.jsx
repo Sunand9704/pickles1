@@ -170,6 +170,37 @@ const ProductDetail = () => {
                     alt={product.name}
                     className="w-full h-full object-cover"
                   />
+                  
+                  {/* Left Navigation Button */}
+                  {(product.images || []).length > 1 && (
+                    <button
+                      onClick={() => setSelectedImage(prev => 
+                        prev === 0 ? (product.images || []).length - 1 : prev - 1
+                      )}
+                      className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full transition-all duration-200"
+                      aria-label="Previous image"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                  )}
+
+                  {/* Right Navigation Button */}
+                  {(product.images || []).length > 1 && (
+                    <button
+                      onClick={() => setSelectedImage(prev => 
+                        prev === (product.images || []).length - 1 ? 0 : prev + 1
+                      )}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full transition-all duration-200"
+                      aria-label="Next image"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  )}
+
                   {product.discount > 0 && (
                     <div className="absolute top-4 right-4 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium shadow-lg">
                       {product.discount}% OFF

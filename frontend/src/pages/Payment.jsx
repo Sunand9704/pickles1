@@ -183,7 +183,7 @@ const Payment = () => {
 
   if (!orderDetails) {
     return (
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8" style={{backgroundColor: '#98A869'}}>
+      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
           <div className="text-center">
             <p className="text-gray-500">Loading order details...</p>
@@ -194,7 +194,7 @@ const Payment = () => {
   }
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8" style={{backgroundColor: '#98A869'}}>
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Details</h2>
         

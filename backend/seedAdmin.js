@@ -8,9 +8,9 @@ const User = require('./models/User');
 // Admin credentials
 const ADMIN_CREDENTIALS = {
   name: 'Admin User',
-  email: 'admin@amanspices.com',
-  password: 'Admin@123',
-  phone: '+91 9502012861',
+  email: 'sunandvemavarapu@gmail.com',
+  password: 'sunand@9704',
+  phone: '+91 9704726252',
   role: 'admin'
 };
 

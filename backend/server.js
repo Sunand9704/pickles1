@@ -7,6 +7,7 @@ const path = require('path');
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const adminAuthRoutes = require('./routes/adminAuth');
 const userRoutes = require('./routes/users');
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');
@@ -21,6 +22,7 @@ const app = express();
 const allowedOrigins = (process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
   : [
+      'https://pickles-admin.onrender.com',
       'http://localhost:3000',
       'http://localhost:5173',
       'http://localhost:5174',
@@ -72,6 +74,7 @@ fs.chmodSync(productsDir, '755');
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
