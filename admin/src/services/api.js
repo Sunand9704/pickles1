@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Single base URL for admin. Prefer VITE_API_BASE_URL, else VITE_API_URL, else localhost.
 const API_URL = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://pickles-backend.onrender.com/');
-// const API_URL = "http://localhost:5000/"
+// const API_URL = "http://localhost:5012"
 
 const api = axios.create({
   baseURL: API_URL,
@@ -62,6 +62,7 @@ const adminApi = {
   // Products
   products: {
     getAll: () => api.get('/api/products'),
+    getByCategory: (category) => api.get(`/api/products/category/${category}`),
     getById: (id) => api.get(`/api/products/${id}`),
     create: (formData) => {
       const token = localStorage.getItem('adminToken');
