@@ -50,6 +50,18 @@ const User = mongoose.models.User || mongoose.model('User', new mongoose.Schema(
     type: Date,
     default: null
   },
+  otp: {
+    type: String,
+    default: null
+  },
+  otpExpires: {
+    type: Date,
+    default: null
+  },
+  otpType: {
+    type: String,
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now

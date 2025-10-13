@@ -27,6 +27,11 @@ const generateResetToken = () => {
     return crypto.randomBytes(32).toString('hex');
 };
 
+// Generate OTP
+const generateOTP = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
 // Send reset password email
 const sendResetPasswordEmail = async (email, type, resetToken = null) => {
     try {
@@ -129,7 +134,54 @@ const sendResetPasswordEmail = async (email, type, resetToken = null) => {
     }
 };
 
+// Send OTP to admin email
+const sendAdminOTP = async (email, otp) => {
+    try {
+        if (!transporter) {
+            console.log('Email service not configured, skipping OTP email to admin:', email);
+            return { messageId: 'email-disabled' };
+        }
+
+        const subject = 'Admin Password Reset - Verification Code';
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+                <h2 style="color: #333; text-align: center;">Admin Password Reset</h2>
+                <p>We received a request to reset your admin password. Use the verification code below:</p>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <div style="background-color: #dc2626; color: white; padding: 20px; border-radius: 8px; font-size: 32px; font-weight: bold; letter-spacing: 8px; display: inline-block;">
+                        ${otp}
+                    </div>
+                </div>
+
+                <p style="color: #666; font-size: 14px;">This code will expire in 10 minutes.</p>
+                <p style="color: #666; font-size: 14px;">If you did not request this password reset, please ignore this email and contact the system administrator.</p>
+                
+                <div style="margin: 30px 0; padding: 20px; background-color: #fef2f2; border-radius: 4px; border-left: 4px solid #dc2626;">
+                    <p style="color: #666; font-size: 14px; margin: 0;">For security reasons, please keep this verification code confidential and do not share it with anyone.</p>
+                </div>
+            </div>
+        `;
+        
+        const mailOptions = {
+            from: `"Admin Password Reset" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: subject,
+            html: html
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Admin OTP email sent successfully:', info.messageId);
+        return info;
+    } catch (error) {
+        console.error('Error sending admin OTP email:', error);
+        throw new Error(`Failed to send admin OTP email: ${error.message}`);
+    }
+};
+
 module.exports = {
     generateResetToken,
-    sendResetPasswordEmail
+    generateOTP,
+    sendResetPasswordEmail,
+    sendAdminOTP
 }; 
