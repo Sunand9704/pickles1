@@ -47,6 +47,10 @@ const adminApi = {
     getProfile: () => api.get('/api/users/profile'),
     forgotPassword: (email) => api.post('/api/admin/auth/forgot-password', email),
     resetPassword: (data) => api.post('/api/admin/auth/reset-password', data),
+    // New admin OTP-based forgot password endpoints
+    sendAdminOTP: (data) => api.post('/api/admin/auth/send-otp', data),
+    verifyAdminOTP: (data) => api.post('/api/admin/auth/verify-otp', data),
+    resetAdminPassword: (data) => api.post('/api/admin/auth/reset-password-with-token', data),
   },
 
   // Users

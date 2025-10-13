@@ -10,6 +10,9 @@ import Orders from "./pages/Orders";
 import Login from "./pages/auth/Login";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
+import AdminForgotPassword from "./pages/auth/AdminForgotPassword";
+import AdminOTPVerification from "./pages/auth/AdminOTPVerification";
+import AdminResetPassword from "./pages/auth/AdminResetPassword";
 
 const PrivateRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -40,6 +43,11 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        
+        {/* New Admin Forgot Password Routes */}
+        <Route path="/admin-forgot-password" element={<AdminForgotPassword />} />
+        <Route path="/admin-verify-otp" element={<AdminOTPVerification />} />
+        <Route path="/admin-reset-password" element={<AdminResetPassword />} />
 
         <Route
           path="/*"
