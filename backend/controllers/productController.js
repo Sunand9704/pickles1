@@ -173,9 +173,21 @@ exports.getProduct = async (req, res) => {
 exports.getProductsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
-    const products = await Product.find({ category }).sort({ createdAt: -1 });
+    
+    // Decode the category parameter to handle URL encoding
+    const decodedCategory = decodeURIComponent(category);
+    console.log('Backend: Searching for category:', decodedCategory);
+    
+    // Use case-insensitive regex search to handle any case variations
+    const products = await Product.find({ 
+      category: { $regex: new RegExp(`^${decodedCategory}$`, 'i') } 
+    }).sort({ createdAt: -1 });
+    
+    console.log('Backend: Found', products.length, 'products for category:', decodedCategory);
+    
     res.json(products);
   } catch (error) {
+    console.error('Backend error fetching products by category:', error);
     res.status(500).json({ error: 'Error fetching products by category' });
   }
 }; 
