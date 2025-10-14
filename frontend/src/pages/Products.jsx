@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast';
 import { products as productsApi } from '../services/api';
 import { mockProducts } from '../data/mockProducts';
 
-const BACKEND_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/')
+const BACKEND_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5012/')
 
 // Helper function to get image URL
 const getImageUrl = (img) => {
@@ -247,7 +247,7 @@ const Products = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('popular');
   const [viewMode, setViewMode] = useState('grid');
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [priceRange, setPriceRange] = useState([0, 5000]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [quantities, setQuantities] = useState({});
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -262,13 +262,17 @@ const Products = () => {
     { id: 'Masala podulu', name: 'Masala podulu', icon: '/images/Ingredients/Ing1.webp', description: 'Enhance your cooking with our aromatic range of freshly ground spice powders.'}
   ];
 
-  const allTags = [...new Set(products.flatMap(product => product.tags))];
+  const allTags = [...new Set(products.flatMap(product => product.tags || []))];
 
   const filteredProducts = products
-    .filter(product => selectedCategory === 'all' || product.category === selectedCategory)
+    .filter(product => {
+      const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+      console.log(`🔍 Filtering product "${product.name}": category="${product.category}", selected="${selectedCategory}", matches=${matchesCategory}`);
+      return matchesCategory;
+    })
     .filter(product => product.name.toLowerCase().includes(searchQuery.toLowerCase()))
     .filter(product => product.price >= priceRange[0] && product.price <= priceRange[1])
-    .filter(product => selectedTags.length === 0 || selectedTags.some(tag => product.tags.includes(tag)))
+    .filter(product => selectedTags.length === 0 || selectedTags.some(tag => (product.tags || []).includes(tag)))
     .sort((a, b) => {
       switch (sortBy) {
         case 'price-low':
@@ -284,19 +288,31 @@ const Products = () => {
       }
     });
 
+  console.log('📊 Frontend: Total products:', products.length);
+  console.log('📊 Frontend: Filtered products:', filteredProducts.length);
+  console.log('📊 Frontend: Selected category:', selectedCategory);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         let response;
+        console.log('🔍 Frontend: Fetching products for category:', selectedCategory);
+        
         if (selectedCategory === 'all') {
           response = await productsApi.getAll();
         } else {
           response = await productsApi.getByCategory(selectedCategory);
         }
+        
+        console.log('✅ Frontend: API Response:', response);
+        console.log('📊 Frontend: Products received:', response.data.length);
+        console.log('📋 Frontend: Product names:', response.data.map(p => p.name));
+        
         setProducts(response.data);
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error('❌ Frontend: Error fetching products:', error);
+        console.error('❌ Frontend: Error details:', error.response?.data || error.message);
         setError('Failed to load products. Please try again later.');
         // Fallback to mock data if API fails
         setProducts(mockProducts);
@@ -428,7 +444,7 @@ const Products = () => {
                   <input
                     type="range"
                     min="0"
-                    max="1000"
+                    max="5000"
                     value={priceRange[1]}
                     onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
                     className="w-full h-1 bg-gray-200 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary-500 [&::-webkit-slider-thumb]:cursor-pointer md:[&::-webkit-slider-thumb]:w-4 md:[&::-webkit-slider-thumb]:h-4 md:[&::-moz-range-thumb]:w-4 md:[&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary-500 [&::-moz-range-thumb]:cursor-pointer"
