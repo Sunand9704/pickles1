@@ -16,14 +16,15 @@ export default defineConfig(({ command, mode }) => {
     server: {
       port: 5173,
       host: '0.0.0.0', // This allows access from any device on the network
-      proxy: {
-        '/api': {
-          target: env.VITE_API_BASE_URL || env.VITE_API_URL || 'http://localhost:5000',
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path) => path.replace(/^\/api/, ''),
-        },
-      },
+      // Disabled proxy to use direct API calls
+      // proxy: {
+      //   '/api': {
+      //     target: env.VITE_API_BASE_URL || env.VITE_API_URL || 'http://localhost:5012',
+      //     changeOrigin: true,
+      //     secure: false,
+      //     rewrite: (path) => path.replace(/^\/api/, '/api'),
+      //   },
+      // },
     },
     build: {
       outDir: 'dist',
