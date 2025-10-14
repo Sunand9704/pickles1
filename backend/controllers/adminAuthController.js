@@ -369,3 +369,22 @@ exports.adminResetPasswordWithToken = async (req, res) => {
     });
   }
 };
+
+// Admin Logout
+exports.adminLogout = async (req, res) => {
+  try {
+    // In a real application, you might want to blacklist the token
+    // For now, we'll just return a success message
+    // The client will handle clearing the token from localStorage
+    res.json({ 
+      success: true,
+      message: 'Logged out successfully' 
+    });
+  } catch (error) {
+    console.error('Admin logout error:', error);
+    res.status(500).json({ 
+      error: 'An error occurred during logout',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};

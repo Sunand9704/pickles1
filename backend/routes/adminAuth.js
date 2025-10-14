@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const adminAuthController = require('../controllers/adminAuthController');
+const { authenticateToken } = require('../middleware/auth');
 
 // Admin authentication routes
 router.post('/login', adminAuthController.adminLogin);
+router.post('/logout', authenticateToken, adminAuthController.adminLogout);
 router.post('/forgot-password', adminAuthController.adminForgotPassword);
 router.post('/reset-password', adminAuthController.adminResetPassword);
 

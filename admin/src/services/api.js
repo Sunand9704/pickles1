@@ -43,7 +43,7 @@ const adminApi = {
   // Auth
   auth: {
     login: (credentials) => api.post('/api/admin/auth/login', credentials),
-    logout: () => api.post('/api/auth/logout'),
+    logout: () => api.post('/api/admin/auth/logout'),
     getProfile: () => api.get('/api/users/profile'),
     forgotPassword: (email) => api.post('/api/admin/auth/forgot-password', email),
     resetPassword: (data) => api.post('/api/admin/auth/reset-password', data),

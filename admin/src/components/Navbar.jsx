@@ -29,10 +29,24 @@ const Navbar = () => {
   };
 
   // Handle logout action
-  const handleLogout = () => {
-    localStorage.removeItem("adminToken"); // Remove token from localStorage
-    toast.success("Logged out successfully"); // Show toast message
-    navigate("/login"); // Redirect to login page
+  const handleLogout = async () => {
+    try {
+      // Call logout API endpoint to invalidate token on server
+      await adminApi.auth.logout();
+    } catch (error) {
+      // Even if API call fails, we still want to logout locally
+      console.warn("Logout API call failed:", error);
+    } finally {
+      // Clear all admin-related data from localStorage
+      localStorage.removeItem("adminToken");
+      localStorage.removeItem("adminUser");
+      
+      // Show success message
+      toast.success("Logged out successfully");
+      
+      // Redirect to login page
+      navigate("/login");
+    }
   };
 
   // Define nav items
