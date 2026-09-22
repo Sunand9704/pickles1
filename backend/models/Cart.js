@@ -6,6 +6,14 @@ const cartItemSchema = new mongoose.Schema({
     ref: 'Product',
     required: true
   },
+  // Which weight variant of the product this line is for. Together with
+  // `product`, this is the uniqueness key for a cart line — the same
+  // product in two different weights is two separate lines.
+  unit: {
+    type: String,
+    required: true,
+    enum: ['100g', '250g', '500g', '1kg']
+  },
   quantity: {
     type: Number,
     required: true,
@@ -40,7 +48,8 @@ cartSchema.pre('save', function(next) {
 cartSchema.methods.calculateTotal = async function() {
   await this.populate('items.product');
   return this.items.reduce((total, item) => {
-    return total + (item.product.price * item.quantity);
+    const variant = (item.product.variants || []).find(v => v.unit === item.unit);
+    return total + ((variant ? variant.price : 0) * item.quantity);
   }, 0);
 };
 

@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const { VALID_UNITS } = Product;
 const path = require('path');
 const fs = require('fs').promises;
 const cloudinary = require('cloudinary').v2;
@@ -28,6 +29,50 @@ async function uploadLocalFileToCloudinary(relativeFilePath) {
   return result.secure_url;
 }
 
+// Parses the `variants` field sent by the admin form (a JSON string, since
+// multipart/form-data can't carry nested arrays) and validates it: each
+// entry needs a valid unit/price/stock, and units can't repeat.
+function parseVariants(rawVariants) {
+  let variants = rawVariants;
+  if (typeof variants === 'string') {
+    try {
+      variants = JSON.parse(variants);
+    } catch (_) {
+      throw new Error('Invalid variants payload');
+    }
+  }
+
+  if (!Array.isArray(variants) || variants.length === 0) {
+    throw new Error('At least one weight variant is required');
+  }
+
+  const seenUnits = new Set();
+  const parsed = variants.map((v) => {
+    const unit = v.unit;
+    const price = Number(v.price);
+    const stock = Number(v.stock);
+
+    if (!VALID_UNITS.includes(unit)) {
+      throw new Error(`Invalid unit: ${unit}`);
+    }
+    if (seenUnits.has(unit)) {
+      throw new Error(`Duplicate weight option: ${unit}`);
+    }
+    seenUnits.add(unit);
+
+    if (Number.isNaN(price) || price < 0) {
+      throw new Error(`Invalid price for ${unit}`);
+    }
+    if (Number.isNaN(stock) || stock < 0) {
+      throw new Error(`Invalid stock for ${unit}`);
+    }
+
+    return { unit, price, stock };
+  });
+
+  return parsed;
+}
+
 // Get all products
 exports.getAllProducts = async (req, res) => {
   try {
@@ -44,10 +89,7 @@ exports.createProduct = async (req, res) => {
     const {
       name,
       description,
-      price,
       category,
-      stock,
-      unit,
       discount,
       isDiscountActive,
       discountStartDate,
@@ -57,6 +99,8 @@ exports.createProduct = async (req, res) => {
       offerEndDate,
       isOfferActive
     } = req.body;
+
+    const variants = parseVariants(req.body.variants);
 
     // Handle image uploads -> upload to Cloudinary and store URLs
     let images = [];
@@ -71,10 +115,8 @@ exports.createProduct = async (req, res) => {
     const product = new Product({
       name,
       description,
-      price,
       category,
-      stock,
-      unit,
+      variants,
       images,
       discount,
       isDiscountActive,
@@ -98,6 +140,10 @@ exports.updateProduct = async (req, res) => {
   try {
     const productId = req.params.id;
     const updateData = { ...req.body };
+
+    if (updateData.variants !== undefined) {
+      updateData.variants = parseVariants(updateData.variants);
+    }
 
     // Handle new image uploads: upload to Cloudinary and replace images array
     if (req.files && req.files.length > 0) {

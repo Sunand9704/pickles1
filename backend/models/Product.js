@@ -1,5 +1,25 @@
 const mongoose = require('mongoose');
 
+const VALID_UNITS = ['100g', '250g', '500g', '1kg'];
+
+const variantSchema = new mongoose.Schema({
+  unit: {
+    type: String,
+    required: true,
+    enum: VALID_UNITS
+  },
+  price: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  stock: {
+    type: Number,
+    required: true,
+    min: 0
+  }
+}, { _id: false });
+
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -10,25 +30,20 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  price: {
-    type: Number,
-    required: true,
-    min: 0
-  },
   category: {
     type: String,
     required: true,
     enum: ['Shop all', 'Non Veg pickles', 'Veg pickles', 'Snacks', 'Sweets', 'Masala podulu']
   },
-  stock: {
-    type: Number,
+  // Per-weight price & stock. A product must offer at least one weight,
+  // and each weight may appear at most once (enforced in the controller).
+  variants: {
+    type: [variantSchema],
     required: true,
-    min: 0
-  },
-  unit: {
-    type: String,
-    required: true,
-    enum: ['100g', '250g', '500g', '1kg']
+    validate: {
+      validator: (variants) => Array.isArray(variants) && variants.length > 0,
+      message: 'A product must have at least one weight variant'
+    }
   },
   images: [{
     type: String,
@@ -76,4 +91,5 @@ const productSchema = new mongoose.Schema({
   timestamps: true
 });
 
-module.exports = mongoose.model('Product', productSchema); 
+module.exports = mongoose.model('Product', productSchema);
+module.exports.VALID_UNITS = VALID_UNITS;

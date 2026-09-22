@@ -36,7 +36,9 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        // Reads from --font-sans, defined once in src/styles/font.css —
+        // change the font there, not here.
+        sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       container: {
         center: true,

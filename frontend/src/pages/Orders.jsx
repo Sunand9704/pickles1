@@ -37,25 +37,61 @@ const Loader = ({ size = 'large', text = 'Loading...' }) => {
   );
 };
 
-const statusStyles = {
-  delivered: 'bg-green-100 text-green-800',
-  processing: 'bg-blue-100 text-blue-800',
-  out_for_delivery: 'text-white',
-  'out for delivery': 'text-white',
-  pending: 'text-white',
-  cancelled: 'bg-red-100 text-red-800',
+const ORDER_STEPS = [
+  { key: 'pending', label: 'Order Placed' },
+  { key: 'confirmed', label: 'Confirmed' },
+  { key: 'out_for_delivery', label: 'Out for Delivery' },
+  { key: 'delivered', label: 'Delivered' }
+];
+
+const OrderStatusTracker = ({ status }) => {
+  if (status === 'cancelled') {
+    return (
+      <div className="px-4 py-3 bg-red-50 text-red-700 rounded-md text-sm font-medium text-center">
+        This order was cancelled
+      </div>
+    );
+  }
+
+  const currentIndex = ORDER_STEPS.findIndex((step) => step.key === status);
+
+  return (
+    <div className="flex items-start">
+      {ORDER_STEPS.map((step, index) => {
+        const isComplete = index <= currentIndex;
+        const isLast = index === ORDER_STEPS.length - 1;
+        return (
+          <React.Fragment key={step.key}>
+            <div className="flex flex-col items-center flex-shrink-0 w-16">
+              <div
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                  isComplete ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-500'
+                }`}
+              >
+                {isComplete ? '✓' : index + 1}
+              </div>
+              <span className={`mt-1 text-[10px] text-center leading-tight ${isComplete ? 'text-primary-600 font-medium' : 'text-gray-400'}`}>
+                {step.label}
+              </span>
+            </div>
+            {!isLast && (
+              <div className={`flex-1 h-0.5 mt-3 ${index < currentIndex ? 'bg-primary-600' : 'bg-gray-200'}`} />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
 };
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [actionLoading, setActionLoading] = useState({ type: null, orderId: null });
   const [error, setError] = useState(null);
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
-  const [trackingLoading, setTrackingLoading] = useState(false);
   const { user } = useAuth();
   const location = useLocation();
 
@@ -71,21 +107,35 @@ const Orders = () => {
 
   useEffect(() => {
     fetchOrders();
+    // Admin status changes land in the DB, not pushed to the browser — poll
+    // in the background so a customer sees updates without a manual reload.
+    const interval = setInterval(() => fetchOrders({ background: true }), 20000);
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchOrders = async () => {
+  const fetchOrders = async ({ background = false } = {}) => {
     try {
-      setLoading(true);
+      if (background) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       const response = await ordersApi.getAll();
       if (response.data) {
         setOrders(response.data);
       }
     } catch (error) {
       console.error('Error fetching orders:', error);
-      setError('Failed to fetch orders');
-      toast.error('Failed to fetch orders');
+      if (!background) {
+        setError('Failed to fetch orders');
+        toast.error('Failed to fetch orders');
+      }
     } finally {
-      setLoading(false);
+      if (background) {
+        setRefreshing(false);
+      } else {
+        setLoading(false);
+      }
     }
   };
 
@@ -93,7 +143,6 @@ const Orders = () => {
     const colors = {
       pending: 'text-white',
       confirmed: 'bg-blue-100 text-blue-800',
-      preparing: 'bg-purple-100 text-purple-800',
       out_for_delivery: 'text-white',
       delivered: 'bg-green-100 text-green-800',
       cancelled: 'bg-red-100 text-red-800'
@@ -113,41 +162,6 @@ const Orders = () => {
       } finally {
         setActionLoading({ type: null, orderId: null });
       }
-    }
-  };
-
-  const handleTrackOrder = async (order) => {
-    try {
-      setTrackingLoading(true);
-      const response = await ordersApi.getTracking(order._id);
-      setSelectedOrder({ ...order, trackingDetails: response.data.trackingDetails });
-      setIsTrackingModalOpen(true);
-    } catch (err) {
-      toast.error('Failed to fetch tracking details');
-    } finally {
-      setTrackingLoading(false);
-    }
-  };
-
-  const handleDownloadInvoice = async (order) => {
-    try {
-      setActionLoading({ type: 'download', orderId: order._id });
-      const response = await ordersApi.getInvoice(order._id, {
-        responseType: 'blob'
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `invoice-${order._id}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      toast.success('Invoice downloaded successfully');
-    } catch (err) {
-      toast.error('Failed to download invoice');
-    } finally {
-      setActionLoading({ type: null, orderId: null });
     }
   };
 
@@ -215,7 +229,7 @@ const Orders = () => {
             <ul className="list-disc list-inside mb-3">
               {location.state.orderSummary.items.map((item, index) => (
                 <li key={index} className="text-sm">
-                  {item.name} x {item.quantity} - ₹{item.price}
+                  {item.name}{item.unit ? ` (${item.unit})` : ''} x {item.quantity} - ₹{item.price}
                 </li>
               ))}
             </ul>
@@ -245,6 +259,14 @@ const Orders = () => {
               </option>
             ))}
           </select>
+          <button
+            onClick={() => fetchOrders()}
+            disabled={loading || refreshing}
+            className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200"
+            title="Refresh order statuses"
+          >
+            {refreshing ? 'Refreshing…' : 'Refresh'}
+          </button>
         </div>
 
         {orders.length === 0 ? (
@@ -274,11 +296,15 @@ const Orders = () => {
                   </div>
 
                   <div className="border-t border-gray-200 pt-4">
+                    <OrderStatusTracker status={order.status} />
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-4 mt-4">
                     <h3 className="text-sm font-medium text-gray-900 mb-2">Items</h3>
                     <div className="space-y-2">
                       {order.items.map((item) => (
                         <div key={item._id} className="flex justify-between text-sm">
-                          <span>{item.product?.name} x {item.quantity}</span>
+                          <span>{item.product?.name}{item.unit ? ` (${item.unit})` : ''} x {item.quantity}</span>
                           <span>₹{item.price * item.quantity}</span>
                         </div>
                       ))}
@@ -307,14 +333,6 @@ const Orders = () => {
                     </div>
                   </div>
 
-                  {order.status === 'out_for_delivery' && order.otp && (
-                    <div className="border-t border-gray-200 pt-4 mt-4">
-                      <p className="text-sm text-gray-500">
-                        Delivery OTP: <span className="font-semibold">{order.otp}</span>
-                      </p>
-                    </div>
-                  )}
-
                   <div className="border-t border-gray-200 pt-4 mt-4 flex justify-end space-x-4">
                     {order.status !== 'cancelled' && order.status !== 'delivered' && (
                       <button
@@ -338,30 +356,4 @@ const Orders = () => {
   );
 };
 
-const statusSteps = [
-  { key: 'pending', label: 'Pending' },
-  { key: 'confirmed', label: 'Confirmed' },
-  { key: 'preparing', label: 'Preparing' },
-  { key: 'out_for_delivery', label: 'Out for Delivery' },
-  { key: 'delivered', label: 'Delivered' }
-];
-
-function SimpleModal({ open, onClose, title, children }) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative">
-        <button onClick={onClose} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-        <h2 className="text-xl font-semibold mb-4 text-center">{title}</h2>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-const copyToClipboard = (otp) => {
-  navigator.clipboard.writeText(otp);
-  toast.success('OTP copied to clipboard!');
-};
-
-export default Orders; 
+export default Orders;

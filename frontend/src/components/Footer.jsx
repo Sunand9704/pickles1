@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { FaWhatsapp } from 'react-icons/fa';
 
 const Footer = () => {
   return (
@@ -8,7 +9,7 @@ const Footer = () => {
           {/* Company Info */}
             <div className="flex flex-col items-center space-y-4 w-full md:w-1/5">
               <Link to="/" className="flex items-center">
-                <img src="/images/Logos/logo.png" alt="AMAN SPICES AND PICKLES Logo" className="h-32 transition-transform duration-300 hover:scale-105" style={{ backgroundColor: 'transparent' }} />
+                <img src="/images/Logos/logo.png" alt="AMAN SPICES AND PICKLES Logo" className="h-48 transition-transform duration-300 hover:scale-105" style={{ backgroundColor: 'transparent' }} />
               </Link>
              <h3 className="text-4xl font-bold text-black">Amanspices</h3>
             <p className="text-black text-center max-w-xs">
@@ -63,6 +64,17 @@ const Footer = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
                 <span className="text-black">+91 9502012861</span>
+              </li>
+              <li className="flex items-center justify-center space-x-3">
+                <FaWhatsapp className="w-5 h-5 text-brand-gold-400 flex-shrink-0" />
+                <a
+                  href="https://wa.me/919702012861"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-black hover:text-brand-gold-400 transition-colors"
+                >
+                  +91 97020 12861 (WhatsApp)
+                </a>
               </li>
               <li className="flex items-center justify-center space-x-3">
                 <svg className="w-5 h-5 text-brand-gold-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

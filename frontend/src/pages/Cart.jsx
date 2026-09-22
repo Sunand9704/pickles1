@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useCart } from '../context/CartContext';
+import { useCart, getVariant, getVariantPrice, getVariantStock } from '../context/CartContext';
 import { useAddress } from '../context/AddressContext';
+import { useAuth } from '../context/AuthContext';
 import { FaTrash, FaPlus, FaMinus, FaMapMarkerAlt, FaShoppingBag, FaTimes } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { Loader } from '../components/Loader';
 import { BACKEND_URL } from '../config';
+import { calculateShippingFee, FREE_SHIPPING_THRESHOLD } from '../utils/shipping';
 
 const getImageUrl = (img) => {
   if (!img) return '/placeholder.png';
@@ -17,6 +19,7 @@ const Cart = () => {
   const navigate = useNavigate();
   const { cart, loading: cartLoading, error: cartError, initialized, updateQuantity, removeFromCart, clearCart } = useCart();
   const { addresses, selectedAddress, loading: addressLoading, selectAddress } = useAddress();
+  const { isAuthenticated } = useAuth();
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [selectedDeliveryDate, setSelectedDeliveryDate] = useState('');
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('');
@@ -31,11 +34,12 @@ const Cart = () => {
 
   // Calculate cart totals with null checks
   const subtotal = cart?.reduce((total, item) => {
-    if (!item || !item.product?.price || !item.quantity) return total;
-    return total + (item.product.price * item.quantity);
+    if (!item || !item.product || !item.quantity) return total;
+    return total + (getVariantPrice(item.product, item.unit) * item.quantity);
   }, 0) || 0;
 
-  const total = subtotal;
+  const shippingFee = isAuthenticated ? calculateShippingFee(subtotal, selectedAddress?.state) : 0;
+  const total = subtotal + shippingFee;
 
   // Get available delivery dates (next 7 days)
   const getDeliveryDates = () => {
@@ -75,17 +79,16 @@ const Cart = () => {
         return;
       }
 
-      // Validate quantity against min and max order limits
-      const minOrder = item.product?.minOrder || 1;
-      const maxOrder = item.product?.maxOrder || 100;
+      // Validate quantity against available stock for the selected weight
+      const availableStock = getVariantStock(item.product, item.unit);
 
-      if (newQuantity < minOrder) {
-        toast.error(`Minimum order quantity is ${minOrder}`);
+      if (newQuantity < 1) {
+        toast.error('Minimum order quantity is 1');
         return;
       }
 
-      if (newQuantity > maxOrder) {
-        toast.error(`Maximum order quantity is ${maxOrder}`);
+      if (newQuantity > availableStock) {
+        toast.error(`Only ${availableStock} ${item.unit} available`);
         return;
       }
 
@@ -131,6 +134,11 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: { pathname: '/cart' } } });
+      return;
+    }
+
     if (!selectedAddress) {
       toast.error('Please select a delivery address');
       return;
@@ -138,6 +146,12 @@ const Cart = () => {
 
     if (!selectedDeliveryDate || !selectedTimeSlot) {
       toast.error('Please select delivery date and time');
+      return;
+    }
+
+    const hasInvalidItem = (cart || []).some((item) => !getVariant(item.product, item.unit));
+    if (hasInvalidItem) {
+      toast.error('Please remove the unavailable item(s) from your cart before checking out');
       return;
     }
 
@@ -244,7 +258,9 @@ const Cart = () => {
                         <div className="flex items-center justify-between gap-4">
                           <h3 className="text-lg font-medium text-gray-900 truncate flex-1">{item?.product?.name}</h3>
                           <div className="flex items-center gap-2">
-                            <p className="text-lg font-medium text-gray-900">₹{item?.product?.price * item.quantity}</p>
+                            {getVariant(item.product, item.unit) && (
+                              <p className="text-lg font-medium text-gray-900">₹{getVariantPrice(item.product, item.unit) * item.quantity}</p>
+                            )}
                             <button
                               onClick={() => handleRemoveItem(item._id)}
                               disabled={isLoading}
@@ -255,24 +271,32 @@ const Cart = () => {
                             </button>
                           </div>
                         </div>
-                        <p className="mt-1 text-sm text-gray-500">₹{item?.product?.price} per {item?.product?.unit || 'item'}</p>
-                        <div className="mt-4 flex items-center gap-2">
-                          <button
-                            onClick={() => handleQuantityChange(item._id, item.quantity - 1)}
-                            disabled={isLoading || item.quantity <= (item.product?.minOrder || 1)}
-                            className="text-primary-600 hover:text-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 border border-primary-200 rounded-full w-8 h-8 flex items-center justify-center"
-                          >
-                            <FaMinus />
-                          </button>
-                          <span className="mx-2 text-gray-900 font-semibold">{item.quantity}</span>
-                          <button
-                            onClick={() => handleQuantityChange(item._id, item.quantity + 1)}
-                            disabled={isLoading || item.quantity >= (item.product?.maxOrder || 100)}
-                            className="text-primary-600 hover:text-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 border border-primary-200 rounded-full w-8 h-8 flex items-center justify-center"
-                          >
-                            <FaPlus />
-                          </button>
-                        </div>
+                        {getVariant(item.product, item.unit) ? (
+                          <>
+                            <p className="mt-1 text-sm text-gray-500">₹{getVariantPrice(item.product, item.unit)} per {item.unit}</p>
+                            <div className="mt-4 flex items-center gap-2">
+                              <button
+                                onClick={() => handleQuantityChange(item._id, item.quantity - 1)}
+                                disabled={isLoading || item.quantity <= 1}
+                                className="text-primary-600 hover:text-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 border border-primary-200 rounded-full w-8 h-8 flex items-center justify-center"
+                              >
+                                <FaMinus />
+                              </button>
+                              <span className="mx-2 text-gray-900 font-semibold">{item.quantity}</span>
+                              <button
+                                onClick={() => handleQuantityChange(item._id, item.quantity + 1)}
+                                disabled={isLoading || item.quantity >= getVariantStock(item.product, item.unit)}
+                                className="text-primary-600 hover:text-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 border border-primary-200 rounded-full w-8 h-8 flex items-center justify-center"
+                              >
+                                <FaPlus />
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <p className="mt-1 text-sm text-red-600">
+                            This item's weight option is no longer available — please remove it and add it again.
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -291,80 +315,109 @@ const Cart = () => {
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
-                {/* Delivery Address */}
-                <div className="mb-6">
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">Delivery Address</h3>
-                  {addresses && addresses.length > 0 ? (
-                    <div className="space-y-2">
-                      {addresses.map((address) => (
-                        <div
-                          key={address._id}
-                          onClick={() => selectAddress(address)}
-                          className={`p-3 border rounded-md cursor-pointer transition-colors duration-200 ${selectedAddress?._id === address._id ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-500'}`}
-                        >
-                          <div className="flex items-start">
-                            <FaMapMarkerAlt className="text-primary-500 mt-1 mr-2" />
-                            <div>
-                              <p className="text-sm text-gray-900">{address.street}</p>
-                              <p className="text-sm text-gray-500">{address.city}, {address.state} {address.pincode}</p>
+                {isAuthenticated ? (
+                  <>
+                    {/* Delivery Address */}
+                    <div className="mb-6">
+                      <h3 className="text-sm font-medium text-gray-900 mb-2">Delivery Address</h3>
+                      {addresses && addresses.length > 0 ? (
+                        <div className="space-y-2">
+                          {addresses.map((address) => (
+                            <div
+                              key={address._id}
+                              onClick={() => selectAddress(address)}
+                              className={`p-3 border rounded-md cursor-pointer transition-colors duration-200 ${selectedAddress?._id === address._id ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-500'}`}
+                            >
+                              <div className="flex items-start">
+                                <FaMapMarkerAlt className="text-primary-500 mt-1 mr-2" />
+                                <div>
+                                  <p className="text-sm text-gray-900">{address.street}</p>
+                                  <p className="text-sm text-gray-500">{address.city}, {address.state} {address.pincode}</p>
+                                </div>
+                              </div>
                             </div>
-                          </div>
+                          ))}
+                          <button
+                            onClick={() => navigate('/address')}
+                            className="w-full text-sm text-primary-600 hover:text-primary-700 transition-colors duration-200"
+                          >
+                            + Add New Address
+                          </button>
                         </div>
-                      ))}
-                      <button
-                        onClick={() => navigate('/address')}
-                        className="w-full text-sm text-primary-600 hover:text-primary-700 transition-colors duration-200"
-                      >
-                        + Add New Address
-                      </button>
+                      ) : (
+                        <div className="text-center py-4">
+                          <p className="text-sm text-gray-500 mb-2">No addresses found</p>
+                          <button
+                            onClick={() => navigate('/address')}
+                            className="text-sm text-primary-600 hover:text-primary-700 transition-colors duration-200"
+                          >
+                            Add Address
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="text-center py-4">
-                      <p className="text-sm text-gray-500 mb-2">No addresses found</p>
-                      <button
-                        onClick={() => navigate('/address')}
-                        className="text-sm text-primary-600 hover:text-primary-700 transition-colors duration-200"
-                      >
-                        Add Address
-                      </button>
+                    {/* Delivery Date & Time */}
+                    <div className="space-y-4 mb-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Date</label>
+                        <select
+                          value={selectedDeliveryDate}
+                          onChange={(e) => setSelectedDeliveryDate(e.target.value)}
+                          className="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                        >
+                          <option value="">Select a date</option>
+                          {getDeliveryDates().map((date) => (
+                            <option key={date.value} value={date.value}>{date.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Time</label>
+                        <select
+                          value={selectedTimeSlot}
+                          onChange={(e) => setSelectedTimeSlot(e.target.value)}
+                          className="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                        >
+                          <option value="">Select a time slot</option>
+                          {timeSlots.map((slot) => (
+                            <option key={slot.value} value={slot.value}>{slot.label}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
-                  )}
-                </div>
-                {/* Delivery Date & Time */}
-                <div className="space-y-4 mb-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Date</label>
-                    <select
-                      value={selectedDeliveryDate}
-                      onChange={(e) => setSelectedDeliveryDate(e.target.value)}
-                      className="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                  </>
+                ) : (
+                  <div className="mb-6 p-4 bg-primary-50 border border-primary-100 rounded-md text-center">
+                    <p className="text-sm text-gray-700 mb-3">Log in to choose a delivery address and complete your order.</p>
+                    <button
+                      onClick={() => navigate('/login', { state: { from: { pathname: '/cart' } } })}
+                      className="text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 px-4 py-2 rounded-md transition-colors duration-200"
                     >
-                      <option value="">Select a date</option>
-                      {getDeliveryDates().map((date) => (
-                        <option key={date.value} value={date.value}>{date.label}</option>
-                      ))}
-                    </select>
+                      Log in to Checkout
+                    </button>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Time</label>
-                    <select
-                      value={selectedTimeSlot}
-                      onChange={(e) => setSelectedTimeSlot(e.target.value)}
-                      className="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
-                    >
-                      <option value="">Select a time slot</option>
-                      {timeSlots.map((slot) => (
-                        <option key={slot.value} value={slot.value}>{slot.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
+                )}
                 {/* Order Total */}
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex justify-between mb-2">
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-medium">₹{subtotal}</span>
                   </div>
+                  {isAuthenticated && (
+                    <div className="flex justify-between mb-2">
+                      <span className="text-gray-600">Shipping</span>
+                      {shippingFee === 0 ? (
+                        <span className="font-medium text-green-600">FREE</span>
+                      ) : (
+                        <span className="font-medium">₹{shippingFee}</span>
+                      )}
+                    </div>
+                  )}
+                  {isAuthenticated && shippingFee > 0 && subtotal < FREE_SHIPPING_THRESHOLD && (
+                    <p className="text-xs text-gray-500 mb-2">
+                      Add ₹{FREE_SHIPPING_THRESHOLD - subtotal} more to get free shipping (Andhra Pradesh & Telangana only)
+                    </p>
+                  )}
                   <div className="flex justify-between text-lg font-medium">
                     <span>Total</span>
                     <span className="text-primary-600">₹{total}</span>
@@ -372,10 +425,10 @@ const Cart = () => {
                 </div>
                 <button
                   onClick={handleCheckout}
-                  disabled={isLoading || !selectedAddress || !selectedDeliveryDate || !selectedTimeSlot}
+                  disabled={isLoading || (isAuthenticated && (!selectedAddress || !selectedDeliveryDate || !selectedTimeSlot))}
                   className="mt-6 w-full bg-primary-600 text-white py-3 px-4 rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 >
-                  {isLoading ? 'Processing...' : 'Proceed to Checkout'}
+                  {isLoading ? 'Processing...' : isAuthenticated ? 'Proceed to Checkout' : 'Log in to Checkout'}
                 </button>
               </div>
             </div>

@@ -4,6 +4,7 @@ const Product = require('../models/Product');
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
 const { sendOrderConfirmationToUser, sendOrderNotificationToAdmin } = require('../utils/emailService');
+const { calculateShippingFee } = require('../utils/shipping');
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET
@@ -53,6 +54,12 @@ exports.createOrder = async (req, res) => {
         const { items, address, deliveryDate, deliveryTime , paymentStatus, amount, currency = 'INR', receipt} = req.body;
         console.log("items", items);
         const userId = req.user._id;
+
+        // Shipping is computed server-side from the order's own items/address —
+        // never trust a client-supplied total for this.
+        const itemsTotal = items?.reduce((total, item) => total + (item.price * item.quantity), 0) || 0;
+        const shippingFee = (items?.length || 0) === 0 ? 0 : calculateShippingFee(itemsTotal, address?.state);
+
         // Create the order
         const order = new Order({
             user: userId,
@@ -60,7 +67,8 @@ exports.createOrder = async (req, res) => {
             address,
             deliveryDate,
             deliveryTime,
-            totalAmount: items?.reduce((total, item) => total + (item.price * item.quantity), 0),
+            shippingFee,
+            totalAmount: itemsTotal + shippingFee,
             status: 'pending',
             paymentStatus
         });
@@ -119,6 +127,7 @@ PIN: ${order.address.pincode}
                 order: {
                     _id: order._id,
                     items: order.items,
+                    shippingFee: order.shippingFee,
                     totalAmount: order.totalAmount,
                     deliveryDate: order.deliveryDate,
                     deliveryTime: order.deliveryTime,
@@ -150,6 +159,7 @@ PIN: ${order.address.pincode}
                 order: {
                     _id: order._id,
                     items: order.items,
+                    shippingFee: order.shippingFee,
                     totalAmount: order.totalAmount,
                     deliveryDate: order.deliveryDate,
                     deliveryTime: order.deliveryTime,
@@ -283,11 +293,12 @@ exports.cancelOrder = async (req, res) => {
     order.status = 'cancelled';
     await order.save();
 
-    // Restore product stock
+    // Restore product stock for the specific weight variant that was ordered
     for (const item of order.items) {
-      await Product.findByIdAndUpdate(
-        item.product,
-        { $inc: { stock: item.quantity } }
+      if (!item.unit) continue; // pre-variant orders have no unit to restore against
+      await Product.updateOne(
+        { _id: item.product, 'variants.unit': item.unit },
+        { $inc: { 'variants.$.stock': item.quantity } }
       );
     }
 
