@@ -1,0 +1,22 @@
+/*
+ * SINGLE SOURCE OF TRUTH FOR THE SITE FONT.
+ *
+ * To change the font for the entire website, edit --font-sans below.
+ * If the new font is a webfont (Google Fonts etc.), add an @import for
+ * it above the :root block; Trebuchet MS is a system font pre-installed
+ * on Windows/macOS, so no @import is needed here.
+ *
+ * Every page and component pulls its font from Tailwind's `font-sans`
+ * utility (and the default body/html styles), which both resolve to
+ * --font-sans. Nothing else in the codebase should declare a font-family
+ * for body text, so this one edit propagates everywhere automatically.
+ */
+
+:root {
+  --font-sans: 'Trebuchet MS';
+}
+
+html,
+body {
+  font-family: var(--font-sans);
+}

@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const { authenticateToken } = require('../middleware/auth');
 const Order = require('../models/Order');
 const { createOrder } = require('../controllers/orderController');
+const { calculateShippingFee } = require('../utils/shipping');
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
@@ -70,15 +71,24 @@ router.post('/verify-payment', authenticateToken, async (req, res) => {
     if (isAuthentic) {
       console.log("inside if before order creation")
       console.log("order data", orderData)
+
+      // Shipping is computed server-side, same rule as the COD path — never
+      // trust orderData.totalAmount, which is only what the client displayed.
+      const itemsTotal = orderData.items.reduce((total, item) => total + (item.price * item.quantity), 0);
+      const shippingFee = orderData.items.length === 0 ? 0 : calculateShippingFee(itemsTotal, orderData.address?.state);
+
       // Create order in database
       const order = new Order({
         user: req.user.id,
         items: orderData.items.map(item => ({
           product: item.product._id || item.product,
+          name: item.name,
+          unit: item.unit,
           quantity: item.quantity,
           price: item.price
         })),
-        totalAmount: orderData.totalAmount,
+        shippingFee,
+        totalAmount: itemsTotal + shippingFee,
         address: orderData.address,
         deliveryDate: orderData.deliveryDate,
         deliveryTime: orderData.deliveryTime,

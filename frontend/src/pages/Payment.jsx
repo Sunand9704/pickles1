@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useCart, getVariantPrice } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import apiService from '../api/apiService';
 import { toast } from 'react-hot-toast';
+import { calculateShippingFee } from '../utils/shipping';
 
 const Payment = () => {
   const navigate = useNavigate();
@@ -17,17 +18,21 @@ const Payment = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('online'); // Default to Pay Online
 
   useEffect(() => {
-    const total = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    const subtotal = cart.reduce((sum, item) => sum + (getVariantPrice(item.product, item.unit) * item.quantity), 0);
+    const shippingFee = cart.length === 0 ? 0 : calculateShippingFee(subtotal, location.state?.orderData?.address?.state);
     setOrderDetails({
-      total,
+      subtotal,
+      shippingFee,
+      total: subtotal + shippingFee,
       items: cart.map(item => ({
         name: item.product.name,
         product: item.product._id,
+        unit: item.unit,
         quantity: item.quantity,
-        price: item.product.price
+        price: getVariantPrice(item.product, item.unit)
       }))
     });
-  }, [cart]);
+  }, [cart, location.state]);
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -41,7 +46,7 @@ const Payment = () => {
 
   const handlePayment = async () => {
     try {
-      if (!orderDetails || !orderDetails.total) {
+      if (!orderDetails || !orderDetails.items?.length) {
         toast.error('No items in cart');
         return;
       }
@@ -249,12 +254,22 @@ const Payment = () => {
             <div className="mt-4 space-y-2">
               {cart.map((item) => (
                 <div key={item._id} className="flex justify-between">
-                  <span>{item.product.name} x {item.quantity}</span>
-                  <span>₹{item.product.price * item.quantity}</span>
+                  <span>{item.product.name} ({item.unit}) x {item.quantity}</span>
+                  <span>₹{getVariantPrice(item.product, item.unit) * item.quantity}</span>
                 </div>
               ))}
-              <div className="border-t pt-2 font-semibold">
-                <div className="flex justify-between">
+              <div className="border-t pt-2 space-y-1">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Subtotal</span>
+                  <span>₹{orderDetails.subtotal}</span>
+                </div>
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Shipping</span>
+                  <span className={orderDetails.shippingFee === 0 ? 'text-green-600 font-medium' : ''}>
+                    {orderDetails.shippingFee === 0 ? 'FREE' : `₹${orderDetails.shippingFee}`}
+                  </span>
+                </div>
+                <div className="flex justify-between font-semibold pt-1">
                   <span>Total</span>
                   <span>₹{orderDetails.total}</span>
                 </div>

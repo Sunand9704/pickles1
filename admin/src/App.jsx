@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
@@ -14,13 +14,52 @@ import AdminForgotPassword from "./pages/auth/AdminForgotPassword";
 import AdminOTPVerification from "./pages/auth/AdminOTPVerification";
 import AdminResetPassword from "./pages/auth/AdminResetPassword";
 
+// Reads the JWT's payload client-side (no verification — the backend does
+// that on every request) just to check expiry before trusting the token
+// enough to render the admin shell.
+const decodeJwtPayload = (token) => {
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
+        .join('')
+    );
+    return JSON.parse(json);
+  } catch (_) {
+    return null;
+  }
+};
+
 const PrivateRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
-    setIsAuthenticated(!!token);
+    const rawUser = localStorage.getItem("adminUser");
+
+    let valid = false;
+    if (token && rawUser) {
+      const payload = decodeJwtPayload(token);
+      const isExpired = !payload?.exp || payload.exp * 1000 <= Date.now();
+      let user = null;
+      try {
+        user = JSON.parse(rawUser);
+      } catch (_) {
+        user = null;
+      }
+      valid = !isExpired && user?.role === 'admin';
+    }
+
+    if (!valid) {
+      localStorage.removeItem("adminToken");
+      localStorage.removeItem("adminUser");
+    }
+
+    setIsAuthenticated(valid);
     setLoading(false);
   }, []);
 
@@ -32,7 +71,7 @@ const PrivateRoute = ({ children }) => {
     );
   }
 
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  return isAuthenticated ? children : <Navigate to="/login" state={{ from: location }} replace />;
 };
 
 const App = () => {

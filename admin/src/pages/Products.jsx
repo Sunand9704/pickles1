@@ -4,6 +4,26 @@ import adminApi from "../services/api";
 
 const API_URL = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "http://localhost:5000");
 
+const ALL_UNITS = ["100g", "250g", "500g", "1kg"];
+const UNIT_LABELS = { "100g": "100g", "250g": "250g", "500g": "500g", "1kg": "1 Kilogram (1kg)" };
+
+const emptyFormData = () => ({
+  name: "",
+  description: "",
+  category: "shop all",
+  variants: [{ unit: "", price: "", stock: "" }],
+  images: [],
+  imagePreviews: [],
+  discount: 0,
+  isDiscountActive: false,
+  discountStartDate: "",
+  discountEndDate: "",
+  offerPrice: "",
+  offerStartDate: "",
+  offerEndDate: "",
+  isOfferActive: false,
+});
+
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -12,26 +32,7 @@ const Products = () => {
   const [editingProductId, setEditingProductId] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("Shop all");
   const toastShownRef = useRef(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    // category: 'milk',
-    category: "shop all",
-
-    stock: "",
-    unit: "",
-    images: [],
-    imagePreviews: [],
-    discount: 0,
-    isDiscountActive: false,
-    discountStartDate: "",
-    discountEndDate: "",
-    offerPrice: "",
-    offerStartDate: "",
-    offerEndDate: "",
-    isOfferActive: false,
-  });
+  const [formData, setFormData] = useState(emptyFormData());
 
   // const CATEGORIES = ['milk', 'curd', 'butter', 'ghee', 'cheese', 'other'];
 
@@ -142,18 +143,63 @@ const Products = () => {
     });
   };
 
+  const addVariantRow = () => {
+    setFormData((prev) => {
+      if (prev.variants.length >= ALL_UNITS.length) return prev;
+      const usedUnits = new Set(prev.variants.map((v) => v.unit));
+      const nextUnit = ALL_UNITS.find((u) => !usedUnits.has(u)) || "";
+      return { ...prev, variants: [...prev.variants, { unit: nextUnit, price: "", stock: "" }] };
+    });
+  };
+
+  const updateVariantRow = (index, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      variants: prev.variants.map((v, i) => (i === index ? { ...v, [field]: value } : v)),
+    }));
+  };
+
+  const removeVariantRow = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      variants: prev.variants.filter((_, i) => i !== index),
+    }));
+  };
+
+  const availableUnitsFor = (currentUnit) => {
+    const usedElsewhere = new Set(
+      formData.variants.map((v) => v.unit).filter((u) => u && u !== currentUnit)
+    );
+    return ALL_UNITS.filter((u) => !usedElsewhere.has(u));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const cleanedVariants = formData.variants
+      .filter((v) => v.unit)
+      .map((v) => ({ unit: v.unit, price: Number(v.price), stock: Number(v.stock) }));
+
+    if (cleanedVariants.length === 0) {
+      toast.error("Add at least one weight option with a price and stock");
+      return;
+    }
+    if (cleanedVariants.some((v) => Number.isNaN(v.price) || v.price < 0 || Number.isNaN(v.stock) || v.stock < 0)) {
+      toast.error("Every weight option needs a valid price and stock");
+      return;
+    }
+
     try {
       setIsSaving(true);
       const formDataToSend = new FormData();
 
       // Append all form fields
       Object.keys(formData).forEach((key) => {
-        if (key !== "images" && key !== "imagePreviews") {
+        if (key !== "images" && key !== "imagePreviews" && key !== "variants") {
           formDataToSend.append(key, formData[key]);
         }
       });
+      formDataToSend.append("variants", JSON.stringify(cleanedVariants));
 
       // Append all new images
       formData.images.forEach((image, index) => {
@@ -197,10 +243,10 @@ const Products = () => {
       setFormData({
         name: product.name,
         description: product.description,
-        price: product.price,
         category: product.category,
-        stock: product.stock,
-        unit: product.unit,
+        variants: (product.variants && product.variants.length > 0)
+          ? product.variants.map((v) => ({ unit: v.unit, price: v.price, stock: v.stock }))
+          : [{ unit: "", price: "", stock: "" }],
         images: [],
         imagePreviews: product.images.map((image) => getImageUrl(image)),
         discount: product.discount || 0,
@@ -233,14 +279,16 @@ const Products = () => {
     }
   };
 
-  const calculateDiscount = (price, offerPrice) => {
-    if (!offerPrice) return 0;
-    return Math.round(((price - offerPrice) / price) * 100);
-  };
-
   const calculateDiscountedPrice = (price, discount) => {
     if (!discount) return price;
     return price - (price * discount) / 100;
+  };
+
+  // Lowest/highest price across a product's weight variants, for the grid card
+  const getPriceRange = (variants) => {
+    const prices = (variants || []).map((v) => v.price).filter((p) => typeof p === "number");
+    if (prices.length === 0) return null;
+    return { min: Math.min(...prices), max: Math.max(...prices) };
   };
 
   // Add this function to get the full image URL
@@ -260,25 +308,8 @@ const Products = () => {
         </h1>
         <button
           onClick={() => {
-            setFormData({
-              name: "",
-              description: "",
-              price: "",
-              // category: 'milk',
-              category: "shop all",
-              stock: "",
-              unit: "",
-              images: [],
-              imagePreviews: [],
-              discount: 0,
-              isDiscountActive: false,
-              discountStartDate: "",
-              discountEndDate: "",
-              offerPrice: "",
-              offerStartDate: "",
-              offerEndDate: "",
-              isOfferActive: false,
-            });
+            setEditingProductId(null);
+            setFormData(emptyFormData());
             setIsModalOpen(true);
           }}
           // className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors duration-200 w-full md:w-auto"
@@ -337,9 +368,9 @@ const Products = () => {
           >
             {/* Product Image */}
             <div className="w-full h-32 sm:h-40 md:h-48 relative group overflow-hidden">
-              {product.isOfferActive && (
+              {product.isDiscountActive && product.discount > 0 && (
                 <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-md text-sm font-bold">
-                  {calculateDiscount(product.price, product.offerPrice)}% OFF
+                  {product.discount}% OFF
                 </div>
               )}
               {product.images && product.images.length > 0 ? (
@@ -373,11 +404,19 @@ const Products = () => {
                 <p className="text-xs font-semibold text-gray-800">
                   {product.name}
                 </p>
-                <p className="text-[10px] text-gray-600">{product.unit}</p>
+                <p className="text-[10px] text-gray-600">
+                  {(product.variants || []).map((v) => v.unit).join(", ")}
+                </p>
               </div>
               <div className="mt-0.5 flex justify-between items-center">
                 <span className="text-sm font-bold text-gray-900">
-                  ₹{product.price.toLocaleString()}
+                  {(() => {
+                    const range = getPriceRange(product.variants);
+                    if (!range) return "—";
+                    return range.min === range.max
+                      ? `₹${range.min.toLocaleString()}`
+                      : `₹${range.min.toLocaleString()} - ₹${range.max.toLocaleString()}`;
+                  })()}
                 </span>
                 <div className="flex items-center space-x-1">
                   <button
@@ -466,21 +505,6 @@ const Products = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Price
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.price}
-                    onChange={(e) =>
-                      setFormData({ ...formData, price: e.target.value })
-                    }
-                    disabled={isSaving}
-                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
                     Category
                   </label>
                   <select
@@ -501,39 +525,66 @@ const Products = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Stock
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.stock}
-                    onChange={(e) =>
-                      setFormData({ ...formData, stock: e.target.value })
-                    }
-                    disabled={isSaving}
-                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Unit
-                  </label>
-                  <select
-                    value={formData.unit}
-                    onChange={(e) =>
-                      setFormData({ ...formData, unit: e.target.value })
-                    }
-                    disabled={isSaving}
-                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                  >
-                    <option value="">Select Unit</option>
-                    <option value="100g">100g</option>
-                    <option value="250g">250g</option>
-                    <option value="500g">500g</option>
-                    <option value="1kg">1 Kilogram (1kg)</option>
-                  </select>
+                  <div className="flex justify-between items-center">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Weight Options (price &amp; stock per weight)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={addVariantRow}
+                      disabled={isSaving || formData.variants.length >= ALL_UNITS.length}
+                      className="text-xs font-medium text-indigo-600 hover:text-indigo-800 disabled:opacity-40 disabled:hover:text-indigo-600"
+                    >
+                      + Add Weight
+                    </button>
+                  </div>
+                  <div className="mt-2 space-y-2">
+                    {formData.variants.map((variant, index) => (
+                      <div key={index} className="flex gap-2 items-start">
+                        <select
+                          value={variant.unit}
+                          onChange={(e) => updateVariantRow(index, "unit", e.target.value)}
+                          disabled={isSaving}
+                          className="w-32 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                          required
+                        >
+                          <option value="">Select Unit</option>
+                          {availableUnitsFor(variant.unit).map((u) => (
+                            <option key={u} value={u}>{UNIT_LABELS[u]}</option>
+                          ))}
+                        </select>
+                        <input
+                          type="number"
+                          placeholder="Price"
+                          min="0"
+                          value={variant.price}
+                          onChange={(e) => updateVariantRow(index, "price", e.target.value)}
+                          disabled={isSaving}
+                          className="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                          required
+                        />
+                        <input
+                          type="number"
+                          placeholder="Stock"
+                          min="0"
+                          value={variant.stock}
+                          onChange={(e) => updateVariantRow(index, "stock", e.target.value)}
+                          disabled={isSaving}
+                          className="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeVariantRow(index)}
+                          disabled={isSaving || formData.variants.length <= 1}
+                          className="text-red-500 hover:text-red-700 disabled:opacity-30 px-1 py-2"
+                          aria-label="Remove weight option"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -649,14 +700,13 @@ const Products = () => {
                       />
                     </div>
 
-                    <div className="bg-yellow-50 p-4 rounded-md">
-                      <p className="text-sm text-yellow-700">
-                        Discounted Price: ₹
-                        {calculateDiscountedPrice(
-                          formData.price,
-                          formData.discount
-                        ).toFixed(2)}
-                      </p>
+                    <div className="bg-yellow-50 p-4 rounded-md space-y-1">
+                      {formData.variants.filter((v) => v.unit && v.price !== "").map((v) => (
+                        <p key={v.unit} className="text-sm text-yellow-700">
+                          {UNIT_LABELS[v.unit]}: ₹{Number(v.price).toFixed(2)} → ₹
+                          {calculateDiscountedPrice(Number(v.price), formData.discount).toFixed(2)}
+                        </p>
+                      ))}
                     </div>
                   </>
                 )}

@@ -3,6 +3,7 @@ const router = express.Router();
 const { sendOrderConfirmationToUser, sendOrderNotificationToAdmin } = require('../utils/emailService');
 const Order = require('../models/Order');
 const User = require('../models/User');
+const { authenticateToken, isAdmin } = require('../middleware/auth');
 require('dotenv').config();
 
 // Simple test route
@@ -10,8 +11,12 @@ router.get('/', (req, res) => {
     res.json({ message: 'Test route is working' });
 });
 
-// Test email route - supports both GET and POST
-router.all('/test-email', async (req, res) => {
+// Test email route - supports both GET and POST.
+// Admin-only: without this it was reachable by anyone with no token at all,
+// and with no orderId it defaults to the single most recent order in the
+// whole database — leaking that customer's email/address/order contents in
+// the JSON response and re-sending them real "confirmation" emails.
+router.all('/test-email', authenticateToken, isAdmin, async (req, res) => {
     try {
         // Log environment variables
         console.log('Environment Variables:');
@@ -127,26 +132,14 @@ PIN: ${order.address.pincode}
             res.status(500).json({
                 success: false,
                 error: 'Failed to send emails',
-                details: emailError.message,
-                stack: emailError.stack,
-                config: {
-                    hasEmailUser: !!process.env.EMAIL_USER,
-                    hasEmailPassword: !!process.env.EMAIL_PASSWORD,
-                    hasAdminEmail: !!process.env.ADMIN_EMAIL
-                }
+                details: emailError.message
             });
         }
     } catch (error) {
         console.error('Error in test email route:', error);
         res.status(500).json({
             success: false,
-            error: error.message,
-            stack: error.stack,
-            config: {
-                hasEmailUser: !!process.env.EMAIL_USER,
-                hasEmailPassword: !!process.env.EMAIL_PASSWORD,
-                hasAdminEmail: !!process.env.ADMIN_EMAIL
-            }
+            error: error.message
         });
     }
 });

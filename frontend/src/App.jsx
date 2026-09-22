@@ -19,6 +19,7 @@ import Subscriptions from './pages/Subscriptions';
 import About from './pages/About';
 import PrivateRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
+import WhatsAppButton from './components/WhatsAppButton';
 import Contact from './pages/Contact';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsAndConditions from './pages/TermsAndConditions';
@@ -62,7 +63,8 @@ const AppContent = memo(() => {
         }}
       />
       <ScrollToTop />
-      
+      <WhatsAppButton />
+
       {/* Main Layout with Navbar and Footer */}
       <Routes>
         {/* Auth Routes (without Navbar and Footer) */}
@@ -82,15 +84,15 @@ const AppContent = memo(() => {
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/orders" element={<Orders />} />
+          <Route path="/checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
+          <Route path="/orders" element={<PrivateRoute><Orders /></PrivateRoute>} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-conditions" element={<TermsAndConditions />} />
           <Route path="/refund-policy" element={<RefundPolicy />} />
           <Route path="/shipping-policy" element={<ShippingPolicy />} />
           <Route path="/cancellation-policy" element={<CancellationPolicy />} />
-          <Route path="/address" element={<Address />} />
+          <Route path="/address" element={<PrivateRoute><Address /></PrivateRoute>} />
           <Route path="/reviews" element={<PrivateRoute><Reviews /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/payment" element={<PrivateRoute><Payment /></PrivateRoute>} />

@@ -49,9 +49,8 @@ const ShippingPolicy = () => {
                     Our shipping charges are structured as follows:
                   </p>
                   <ul className="list-disc pl-6 space-y-3 text-lg">
-                    <li>Free delivery on orders above ₹500</li>
-                    <li>Standard delivery charge: ₹40</li>
-                    <li>Express delivery charge: ₹80</li>
+                    <li>Free delivery on orders above ₹2,000 within Andhra Pradesh & Telangana</li>
+                    <li>Standard delivery charge: ₹40 (all other orders)</li>
                     <li>Free delivery for subscription orders</li>
                   </ul>
                 </section>

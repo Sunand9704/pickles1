@@ -15,6 +15,10 @@ const orderSchema = new mongoose.Schema({
     name: {
       type: String,
     },
+    unit: {
+      type: String,
+      enum: ['100g', '250g', '500g', '1kg']
+    },
     quantity: {
       type: Number,
       required: true,
@@ -28,6 +32,10 @@ const orderSchema = new mongoose.Schema({
   totalAmount: {
     type: Number,
     required: true
+  },
+  shippingFee: {
+    type: Number,
+    default: 0
   },
   address: {
     street: String,

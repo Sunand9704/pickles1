@@ -66,15 +66,21 @@ exports.getDashboardStats = async (req, res) => {
       }
     ]);
 
-    // Get product statistics
+    // Get product statistics (stock now lives per weight variant)
     const productStats = await Product.aggregate([
+      {
+        $project: {
+          totalVariantStock: { $sum: '$variants.stock' },
+          minVariantStock: { $min: '$variants.stock' }
+        }
+      },
       {
         $group: {
           _id: null,
           totalProducts: { $sum: 1 },
-          totalStock: { $sum: '$stock' },
+          totalStock: { $sum: '$totalVariantStock' },
           lowStockProducts: {
-            $sum: { $cond: [{ $lte: ['$stock', 10] }, 1, 0] }
+            $sum: { $cond: [{ $lte: ['$minVariantStock', 10] }, 1, 0] }
           }
         }
       }
