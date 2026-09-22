@@ -32,13 +32,22 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
-      // Prevent multiple simultaneous redirects on auth expiry
-      if (!window.__isRedirecting401) {
-        window.__isRedirecting401 = true;
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+    const originalRequest = error.config;
+    if (error.response?.status === 401 && originalRequest && !originalRequest._guestRetry) {
+      // Expired/invalid session: drop it and continue as a guest instead of
+      // forcing the login page. Protected pages redirect via ProtectedRoute.
+      const hadToken = !!localStorage.getItem('token');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.dispatchEvent(new Event('auth:logout'));
+
+      // Retry once without the stale token so public data (products etc.) still loads
+      if (hadToken) {
+        originalRequest._guestRetry = true;
+        if (originalRequest.headers) {
+          delete originalRequest.headers.Authorization;
+        }
+        return api(originalRequest);
       }
     }
     return Promise.reject(error);

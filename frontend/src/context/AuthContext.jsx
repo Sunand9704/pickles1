@@ -29,6 +29,11 @@ export const AuthProvider = ({ children }) => {
     };
 
     initAuth();
+
+    // Session expired (401 from API): fall back to guest browsing
+    const handleSessionExpired = () => setUser(null);
+    window.addEventListener('auth:logout', handleSessionExpired);
+    return () => window.removeEventListener('auth:logout', handleSessionExpired);
   }, []);
 
   const login = async (credentials) => {
